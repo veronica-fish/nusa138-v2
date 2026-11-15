@@ -197,14 +197,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- TABS HALAMAN DEPOSIT / WITHDRAW / HISTORY (TAMBAHAN BARU) ---
+    // --- TABS HALAMAN DEPOSIT / WITHDRAW / HISTORY ---
+    // Perbaikan: guard null sebelum addEventListener & akses element
     document.querySelectorAll('.deposit-tab').forEach(tab => {
         tab.addEventListener('click', function() {
             document.querySelectorAll('.deposit-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.deposit-pane').forEach(p => p.classList.remove('active'));
             this.classList.add('active');
+            
             const targetId = this.getAttribute('data-target');
-            document.getElementById(targetId).classList.add('active');
+            const targetPane = targetId ? document.getElementById(targetId) : null;
+            if (targetPane) {
+                targetPane.classList.add('active');
+            } else {
+                console.warn('⚠️ Tab deposit menunjuk ke elemen yang tidak ada:', targetId);
+            }
         });
     });
 
@@ -254,9 +261,12 @@ document.addEventListener('DOMContentLoaded', () => {
         function populateCards() {
             for (let i = 1; i <= totalTransCards; i++) {
                 const data = generateRandomData();
-                document.getElementById(`name${i}`).innerText = data.name;
-                document.getElementById(`amount${i}`).innerText = data.amount;
-                document.getElementById(`type${i}`).innerText = data.date;
+                const nameEl = document.getElementById(`name${i}`);
+                const amountEl = document.getElementById(`amount${i}`);
+                const typeEl = document.getElementById(`type${i}`);
+                if (nameEl) nameEl.innerText = data.name;
+                if (amountEl) amountEl.innerText = data.amount;
+                if (typeEl) typeEl.innerText = data.date;
             }
         }
         function goToTransSlide(index) {
@@ -276,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         question.addEventListener('click', function() {
             const answer = this.nextElementSibling;
             const icon = this.querySelector('i');
+            if (!answer || !icon) return;
             
             if (answer.style.maxHeight) {
                 answer.style.maxHeight = null;
@@ -303,32 +314,39 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentSession) { openLoginPanel(); return; }
         
         document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
-        document.getElementById('depositView').classList.add('active');
+        const depositViewEl = document.getElementById('depositView');
+        if (depositViewEl) depositViewEl.classList.add('active');
         
         const danaPopup = document.getElementById('danaPopup');
         if(danaPopup) danaPopup.classList.remove('active'); 
         window.scrollTo(0, 0); 
 
-        document.getElementById('formInputArea').style.display = 'block';
-        document.getElementById('qrisArea').style.display = 'none';
+        const formInputArea = document.getElementById('formInputArea');
+        const qrisArea = document.getElementById('qrisArea');
+        if (formInputArea) formInputArea.style.display = 'block';
+        if (qrisArea) qrisArea.style.display = 'none';
 
         if (currentSession && currentSession.user) {
             const metadata = currentSession.user.user_metadata;
             
             let usernameTeks = metadata.username || currentSession.user.email.split('@')[0] || "-";
-            document.getElementById('depositUsername').value = usernameTeks;
+            const depositUsernameEl = document.getElementById('depositUsername');
+            if (depositUsernameEl) depositUsernameEl.value = usernameTeks;
 
             let accName = metadata.account_name || "-";
-            document.getElementById('withdrawAccountName').value = accName;
+            const withdrawAccountNameEl = document.getElementById('withdrawAccountName');
+            if (withdrawAccountNameEl) withdrawAccountNameEl.value = accName;
 
             const bankSelect = document.getElementById('withdrawBankSelect');
-            bankSelect.innerHTML = '<option value="">- Silahkan pilih -</option>';
-            if (metadata.bank_name && metadata.account_number) {
-                let opt = document.createElement('option');
-                opt.value = metadata.bank_name;
-                let maskedAcc = metadata.account_number.length > 4 ? '****' + metadata.account_number.slice(-4) : metadata.account_number;
-                opt.text = `${metadata.bank_name} (${maskedAcc})`;
-                bankSelect.appendChild(opt);
+            if (bankSelect) {
+                bankSelect.innerHTML = '<option value="">- Silahkan pilih -</option>';
+                if (metadata.bank_name && metadata.account_number) {
+                    let opt = document.createElement('option');
+                    opt.value = metadata.bank_name;
+                    let maskedAcc = metadata.account_number.length > 4 ? '****' + metadata.account_number.slice(-4) : metadata.account_number;
+                    opt.text = `${metadata.bank_name} (${maskedAcc})`;
+                    bankSelect.appendChild(opt);
+                }
             }
         }
     };
@@ -337,7 +355,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnShowQris = document.getElementById('btnShowQris');
     if (btnShowQris) {
         btnShowQris.addEventListener('click', async () => {
-            const amount = parseInt(document.getElementById('depositAmount').value);
+            const amountInput = document.getElementById('depositAmount');
+            const amount = amountInput ? parseInt(amountInput.value) : NaN;
             if (!amount || amount < 20000) { alert("Minimal deposit adalah Rp 20.000!"); return; }
 
             btnShowQris.innerText = "MEMPROSES...";
@@ -346,24 +365,30 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const BACKEND_URL = 'https://nusa138.wispbyte.app/api/create-qris'; 
 
+                const depositUsernameEl = document.getElementById('depositUsername');
                 const response = await fetch(BACKEND_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         amount: amount, 
-                        username: document.getElementById('depositUsername').value 
+                        username: depositUsernameEl ? depositUsernameEl.value : ''
                     })
                 });
 
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message || 'Gagal membuat QRIS');
 
-                document.getElementById('qrisImage').src = data.qr_url;
-                document.getElementById('qrisNominal').innerText = ": Rp " + amount.toLocaleString('id-ID');
-                document.getElementById('btnDownloadQris').href = data.qr_url;
+                const qrisImage = document.getElementById('qrisImage');
+                const qrisNominal = document.getElementById('qrisNominal');
+                const btnDownloadQris = document.getElementById('btnDownloadQris');
+                if (qrisImage) qrisImage.src = data.qr_url;
+                if (qrisNominal) qrisNominal.innerText = ": Rp " + amount.toLocaleString('id-ID');
+                if (btnDownloadQris) btnDownloadQris.href = data.qr_url;
 
-                document.getElementById('formInputArea').style.display = 'none';
-                document.getElementById('qrisArea').style.display = 'block';
+                const formInputArea = document.getElementById('formInputArea');
+                const qrisArea = document.getElementById('qrisArea');
+                if (formInputArea) formInputArea.style.display = 'none';
+                if (qrisArea) qrisArea.style.display = 'block';
 
             } catch (error) {
                 alert("Gagal menampilkan QRIS: " + error.message);
@@ -377,60 +402,101 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnBackToForm = document.getElementById('btnBackToForm');
     if (btnBackToForm) {
         btnBackToForm.addEventListener('click', () => {
-            document.getElementById('qrisArea').style.display = 'none';
-            document.getElementById('formInputArea').style.display = 'block';
-            document.getElementById('depositAmount').value = ''; 
+            const qrisArea = document.getElementById('qrisArea');
+            const formInputArea = document.getElementById('formInputArea');
+            const depositAmountEl = document.getElementById('depositAmount');
+            if (qrisArea) qrisArea.style.display = 'none';
+            if (formInputArea) formInputArea.style.display = 'block';
+            if (depositAmountEl) depositAmountEl.value = ''; 
         });
     }
 
-    // --- FORMAT ANGKA OTOMATIS (Koma) DI INPUT WITHDRAW ---
-    const withdrawInput = document.getElementById('withdrawAmount');
-    if (withdrawInput) {
-        withdrawInput.addEventListener('input', function(e) {
+    // ==========================================
+    // LOGIKA WITHDRAW (DIPERBAIKI)
+    // ==========================================
+
+    const withdrawAmountInput = document.getElementById('withdrawAmount');
+    const btnWithdraw = document.getElementById('btnWithdraw');
+    const withdrawErrorMsg = document.getElementById('withdrawErrorMsg');
+    const withdrawBankSelect = document.getElementById('withdrawBankSelect');
+
+    // Debug: log status elemen withdraw (bisa dihapus setelah fix)
+    console.log('🔍 [Withdraw] Status elemen:', {
+        withdrawAmountInput: !!withdrawAmountInput,
+        btnWithdraw: !!btnWithdraw,
+        withdrawErrorMsg: !!withdrawErrorMsg,
+        withdrawBankSelect: !!withdrawBankSelect
+    });
+
+    // Format angka otomatis (titik ribuan) di input withdraw
+    if (withdrawAmountInput) {
+        withdrawAmountInput.addEventListener('input', function() {
+            // Hanya izinkan angka
             let value = this.value.replace(/[^0-9]/g, '');
             if (value) {
                 this.value = parseInt(value, 10).toLocaleString('en-US');
             } else {
                 this.value = '';
             }
+            // Reset error saat user mengetik
+            if (withdrawErrorMsg) withdrawErrorMsg.style.display = 'none';
+            this.style.borderColor = '#555';
         });
     }
 
-    // --- LOGIKA TOMBOL WITHDRAW & VALIDASI MINIMAL ---
-    const btnWithdraw = document.getElementById('btnWithdraw');
-    const withdrawErrorMsg = document.getElementById('withdrawErrorMsg');
-    const withdrawAmountInput = document.getElementById('withdrawAmount');
-
+    // Handler tombol Withdraw — DIPERBAIKI dengan guard lengkap
     if (btnWithdraw) {
-        btnWithdraw.addEventListener('click', () => {
+        btnWithdraw.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // Guard: pastikan semua elemen ada
+            if (!withdrawAmountInput || !withdrawErrorMsg || !withdrawBankSelect) {
+                console.error('❌ [Withdraw] Elemen tidak lengkap! Cek ID: withdrawAmount, withdrawErrorMsg, withdrawBankSelect');
+                alert('Terjadi kesalahan sistem. Silakan refresh halaman.');
+                return;
+            }
+
+            // Ambil nominal & bank
             const amountStr = withdrawAmountInput.value.replace(/,/g, '');
-            const amount = parseInt(amountStr);
-            const bank = document.getElementById('withdrawBankSelect').value;
+            const amount = parseInt(amountStr, 10);
+            const bank = withdrawBankSelect.value;
 
-            withdrawErrorMsg.style.display = 'none';
-            withdrawAmountInput.style.borderColor = '#555'; 
-
-            // Validasi Minimal Rp 50.000
-            if (!amount || amount < 50000) {
-                withdrawErrorMsg.style.display = 'block';
-                withdrawAmountInput.style.borderColor = '#ff3333'; 
-                return;
-            }
-
-            if (!bank) {
-                alert("Silakan pilih akun bank yang terdaftar!");
-                return;
-            }
-
-            alert(`Permintaan penarikan sebesar Rp ${amount.toLocaleString('id-ID')} sedang diproses.`);
-            withdrawAmountInput.value = '';
-        });
-    }
-
-    if (withdrawAmountInput) {
-        withdrawAmountInput.addEventListener('input', () => {
+            // Reset tampilan error
             withdrawErrorMsg.style.display = 'none';
             withdrawAmountInput.style.borderColor = '#555';
+
+            // Validasi: minimal Rp 50.000
+            if (!amount || isNaN(amount) || amount < 50000) {
+                withdrawErrorMsg.textContent = 'Minimal penarikan adalah Rp 50.000';
+                withdrawErrorMsg.style.display = 'block';
+                withdrawAmountInput.style.borderColor = '#ff3333';
+                withdrawAmountInput.focus();
+                return;
+            }
+
+            // Validasi: bank wajib dipilih
+            if (!bank) {
+                withdrawErrorMsg.textContent = 'Silakan pilih akun bank yang terdaftar!';
+                withdrawErrorMsg.style.display = 'block';
+                withdrawBankSelect.style.borderColor = '#ff3333';
+                withdrawBankSelect.focus();
+                return;
+            }
+
+            // Sukses — proses penarikan
+            alert(`Permintaan penarikan sebesar Rp ${amount.toLocaleString('id-ID')} sedang diproses.`);
+            withdrawAmountInput.value = '';
+            withdrawBankSelect.style.borderColor = '#555';
+        });
+    } else {
+        console.error('❌ [Withdraw] Tombol #btnWithdraw TIDAK DITEMUKAN di DOM! Cek id="btnWithdraw" di HTML.');
+    }
+
+    // Reset border merah saat bank dipilih
+    if (withdrawBankSelect) {
+        withdrawBankSelect.addEventListener('change', () => {
+            withdrawBankSelect.style.borderColor = '#555';
+            if (withdrawErrorMsg) withdrawErrorMsg.style.display = 'none';
         });
     }
 });
