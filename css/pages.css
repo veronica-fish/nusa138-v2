@@ -42,3 +42,55 @@
 .memo-pagination { display: flex; justify-content: center; gap: 8px; }
 .page-btn { background-color: #4a00e0; color: #fff; border: none; padding: 8px 12px; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px; }
 .memo-watermark { text-align: center; color: #1a1225; font-size: 30px; font-weight: 900; margin-top: 100px; letter-spacing: 2px; }
+
+/* =========================================
+   HALAMAN TENTANG KAMI (FAQ)
+   ========================================= */
+.faq-circle-container { display: flex; justify-content: center; padding: 30px 0; background-color: #000; }
+.faq-circle { width: 80px; height: 80px; background-color: #b05de4; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; cursor: pointer; }
+.general-bar { background-color: #8a2be2; color: white; text-align: center; padding: 12px; font-size: 16px; font-weight: 500; }
+.faq-list { padding: 15px; }
+.faq-item { background-color: #2b2b2b; margin-bottom: 10px; border-radius: 4px; overflow: hidden; }
+.faq-question { display: flex; justify-content: space-between; align-items: center; padding: 15px; color: #f5c451; font-size: 15px; cursor: pointer; user-select: none; }
+.faq-question i { color: #ffffff; font-size: 18px; transition: transform 0.3s ease; }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background-color: #1a1a1a; color: #e0e0e0; font-size: 13px; line-height: 1.6; }
+.faq-answer p { padding: 0 15px 15px 15px; margin: 0; }
+.faq-answer p:first-child { padding-top: 15px; }
+
+/* =========================================
+   HALAMAN INFO PERBANKAN
+   ========================================= */
+.sub-nav-text { font-size: 11px; color: #888; padding: 10px 15px; border-bottom: 1px solid #333; background-color: #050505; word-spacing: -2px; }
+.banking-content { padding: 15px; font-size: 13px; color: #ddd; line-height: 1.6; background-color: #050505; }
+.bank-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; text-align: center; color: #eee; border: 1px solid #444; }
+.bank-table th { background-color: #7b2cbf; color: #fff; padding: 12px 5px; border: 1px solid #444; font-weight: 500; vertical-align: middle; }
+.bank-table td { border: 1px solid #444; padding: 10px 5px; background-color: #0a0a0a; }
+.bank-table .bank-name { color: #7b68ee; font-weight: bold; }
+
+/* =========================================
+   HALAMAN DEPOSIT
+   ========================================= */
+.deposit-tabs { display: flex; border-bottom: 1px solid #2b2236; background: #000; }
+.deposit-tab { flex: 1; text-align: center; padding: 15px 5px; font-size: 14px; color: #888; cursor: pointer; position: relative; }
+.deposit-tab.active { color: #7b2cbf; font-weight: 600; }
+.deposit-tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background-color: #7b2cbf; }
+.deposit-pane { display: none; padding: 20px 15px; }
+.deposit-pane.active { display: block; }
+.deposit-card { background: #000; border: 1px solid #fff; border-radius: 4px; padding: 25px 20px; margin-top: 10px; }
+.deposit-title { text-align: center; font-size: 18px; color: #fff; font-weight: 400; margin-bottom: 5px; letter-spacing: 1px; }
+.deposit-subtitle { text-align: center; font-size: 14px; color: #fff; margin-bottom: 30px; letter-spacing: 0.5px; }
+.deposit-input-group { margin-bottom: 20px; }
+.deposit-input-group label { display: block; font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 10px; }
+.deposit-input-group input#depositUsername { width: 100%; background: rgba(255, 255, 255, 0.08); border: none; color: #888; padding: 14px; font-size: 15px; border-radius: 4px; outline: none; pointer-events: none; user-select: none; }
+.deposit-input-group select { width: 100%; background: transparent; border: 1px solid #fff; color: #fff; padding: 14px; font-size: 15px; border-radius: 0; outline: none; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 15px center; background-size: 12px; }
+.input-prefix-wrapper { display: flex; border: 1px solid #fff; border-radius: 0; background: transparent; }
+.input-prefix-wrapper .prefix { padding: 14px 15px; background: transparent; color: #fff; font-weight: 400; border-right: 1px solid transparent; }
+.input-prefix-wrapper input { width: 100%; background: transparent; border: none; color: #fff; padding: 14px; font-size: 15px; outline: none; }
+.btn-primary { width: 100%; background: #9b51e0; color: #fff; border: none; padding: 16px; font-size: 16px; font-weight: 700; letter-spacing: 1px; border-radius: 4px; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+.btn-primary:active { background: #7b2cbf; }
+.qris-box { background: #fff; padding: 15px; border-radius: 4px; display: inline-block; margin-bottom: 15px; width: 100%; }
+.qris-box img { display: block; width: 100%; max-width: 300px; margin: 0 auto; object-fit: contain; }
+.qris-details { text-align: left; font-size: 15px; color: #fff; margin-bottom: 15px; }
+.qris-details p { display: flex; margin-bottom: 10px; }
+.qris-details span:first-child { flex: 1; }
+.qris-details span:last-child { font-weight: 600; }
