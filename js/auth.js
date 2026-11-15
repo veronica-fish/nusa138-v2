@@ -99,6 +99,42 @@ function switchAccountType(type) {
     }
 }
 
+// ==========================================
+// FUNGSI AMBIL SALDO DARI DATABASE
+// ==========================================
+async function fetchUserBalance(user) {
+    if (!user) return;
+    
+    const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('balance')
+        .eq('id', user.id)
+        .single();
+
+    if (data && !error) {
+        let rawBalance = data.balance || 0;
+        
+        // FORMAT: Rp 10.000 -> IDR 10.00
+        let formatted = (rawBalance / 1000).toFixed(2); 
+        let parts = formatted.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        let finalText = "IDR " + parts.join('.');
+
+        const topBalanceEl = document.getElementById('topBalance');
+        if(topBalanceEl) topBalanceEl.innerText = finalText;
+
+        const profileBalanceEl = document.getElementById('profileBalance');
+        if(profileBalanceEl) profileBalanceEl.innerText = finalText;
+
+        const withdrawBalanceEl = document.getElementById('withdrawBalance');
+        if(withdrawBalanceEl) withdrawBalanceEl.innerText = finalText;
+        
+    } else {
+        const topBalanceEl = document.getElementById('topBalance');
+        if(topBalanceEl) topBalanceEl.innerText = "IDR 0.00";
+    }
+}
+
 async function fetchUserProfile() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (user) {
@@ -107,7 +143,8 @@ async function fetchUserProfile() {
         document.getElementById('profAccountName').innerText = metadata.account_name || '-';
         document.getElementById('profEmail').innerText = maskEmail(user.email);
         document.getElementById('profPhone').innerText = maskPhone(metadata.phone);
-        document.getElementById('profileBalance').innerText = document.getElementById('topBalance').innerText;
+        
+        fetchUserBalance(user);
     }
 }
 
@@ -128,6 +165,8 @@ function checkAuthState(session) {
         if(infoBar) infoBar.style.display = 'flex'; 
         closeLoginPanel();
         closeRegisterView();
+        
+        fetchUserBalance(session.user);
     } else {
         if(authTabs) authTabs.style.display = 'flex'; 
         if(infoBar) infoBar.style.display = 'none'; 
