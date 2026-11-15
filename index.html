@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- OVERLAY LOADING (Muncul saat pindah halaman) -->
+    <!-- OVERLAY LOADING -->
     <div id="loadingOverlay">
         <div class="spinner"></div>
     </div>
@@ -46,7 +46,7 @@
         <!-- =========================================
              HALAMAN HOME
              ========================================= -->
-        <main id="homeView" class="page-view">
+        <main id="homeView" class="page-view active">
             <section class="banner-slider">
                 <div class="banner-track" id="bannerTrack">
                     <div class="banner-slide"><img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/b1.png" alt="Banner 1" draggable="false"></div>
@@ -303,7 +303,7 @@
         </div>
 
         <!-- =========================================
-             HALAMAN DEPOSIT
+             HALAMAN DEPOSIT & WITHDRAW
              ========================================= -->
         <div id="depositView" class="page-view">
             <div class="deposit-tabs">
@@ -318,7 +318,6 @@
                     <h3 class="deposit-title">DEPOSIT QRIS</h3>
                     <p class="deposit-subtitle">(PROSES CEPAT, GAMPANG & AUTOMATIS)</p>
 
-                    <!-- AREA 1: FORM INPUT -->
                     <div id="formInputArea">
                         <div class="deposit-input-group">
                             <label>Username</label>
@@ -343,7 +342,6 @@
                         <button type="button" class="btn-primary" id="btnShowQris">TAMPILKAN QRIS</button>
                     </div>
 
-                    <!-- AREA 2: TAMPILAN QRIS (Awalnya Tersembunyi) -->
                     <div id="qrisArea" style="display: none;">
                         <div class="qris-box">
                             <img id="qrisImage" src="" alt="QRIS Code">
@@ -360,9 +358,48 @@
 
             <!-- TAB WITHDRAW -->
             <div id="withdrawForm" class="deposit-pane">
-                <div class="deposit-card" style="text-align: center; padding: 40px 20px;">
-                    <h3>Withdraw</h3>
-                    <p style="color: #aaa; margin-top: 10px;">Fitur penarikan dana sedang dalam pemeliharaan. Silakan hubungi CS.</p>
+                <div class="withdraw-container">
+                    
+                    <div class="withdraw-row">
+                        <label>Dompet</label>
+                        <div class="wallet-option">
+                            <input type="radio" checked>
+                            <div class="wallet-details">
+                                <span class="wallet-name">Permainan</span>
+                                <span class="wallet-balance" id="withdrawBalance">IDR 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="withdraw-row" style="align-items: flex-start;">
+                        <label style="margin-top: 12px;">Jumlah</label>
+                        <div style="width: 65%;">
+                            <input type="text" id="withdrawAmount" class="withdraw-input" placeholder="0" style="width: 100%;">
+                            <div id="withdrawErrorMsg" style="color: #ff3333; font-size: 12px; margin-top: 5px; display: none;">
+                                Jumlah penarikan minimum adalah IDR50,000.00
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="withdraw-row">
+                        <label>Akun<br>Sudah<br>terdaftar<span style="color:red">*</span></label>
+                        <select id="withdrawBankSelect" class="withdraw-input">
+                            <option value="">- Silahkan pilih -</option>
+                        </select>
+                    </div>
+
+                    <div class="withdraw-row">
+                        <label>Nama Sesuai<br>Rekening</label>
+                        <input type="text" id="withdrawAccountName" class="withdraw-input" readonly>
+                    </div>
+
+                    <button type="button" class="btn-withdraw" id="btnWithdraw">Withdraw</button>
+
+                    <div class="withdraw-notice">
+                        <h4>PEMBERITAHUAN PENTING</h4>
+                        <p>Pastikan nama dan nomor rekening yang Anda masukkan sudah benar. Proses penarikan dana akan diproses dalam waktu 1x24 jam.</p>
+                    </div>
+
                 </div>
             </div>
 
