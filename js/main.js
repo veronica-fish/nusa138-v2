@@ -1,6 +1,5 @@
 // ============================================================
-// BAGIAN 1: WITHDRAW & FORMAT ANGKA (SISTEM ANTI-HACK RPC)
-// Diletakkan di luar DOMContentLoaded agar selalu berfungsi
+// BAGIAN 1: WITHDRAW & FORMAT ANGKA (EVENT DELEGATION)
 // ============================================================
 
 // Format angka otomatis (titik ribuan) di input withdraw
@@ -19,7 +18,22 @@ document.body.addEventListener('input', function (e) {
     e.target.style.borderColor = '#555';
 });
 
-// Handler klik tombol Withdraw (Verifikasi Saldo di Server)
+// Reset border merah & update nama rekening saat bank dipilih
+document.body.addEventListener('change', function (e) {
+    if (e.target.id !== 'withdrawBankSelect') return;
+    e.target.style.borderColor = '#555';
+    
+    const errMsg = document.getElementById('withdrawErrorMsg');
+    if (errMsg) errMsg.style.display = 'none';
+
+    const opt = e.target.options[e.target.selectedIndex];
+    const nameEl = document.getElementById('withdrawAccountName');
+    if (nameEl && opt && opt.dataset.accountName) {
+        nameEl.value = opt.dataset.accountName;
+    }
+});
+
+// Handler klik tombol Withdraw (Menggunakan RPC Anti-Hack)
 document.body.addEventListener('click', async function (e) {
     const btn = e.target.closest('#btnWithdraw');
     if (!btn) return;
@@ -38,7 +52,6 @@ document.body.addEventListener('click', async function (e) {
 
     if (!withdrawAmountInput || !withdrawErrorMsg || !withdrawBankSelect) return;
 
-    // 1. VALIDASI INPUT DASAR
     const amountStr = withdrawAmountInput.value.replace(/[.,\s]/g, '');
     const amount = parseInt(amountStr, 10);
     const selectedBankValue = withdrawBankSelect.value;
@@ -71,7 +84,6 @@ document.body.addEventListener('click', async function (e) {
     btn.innerText = 'MEMPROSES...';
 
     try {
-        // 2. PANGGIL RPC DATABASE (Proses potong saldo dilakukan oleh Supabase)
         const { data: isSuccess, error } = await supabaseClient.rpc('request_withdraw', {
             payload: {
                 amount: amount,
@@ -83,21 +95,16 @@ document.body.addEventListener('click', async function (e) {
 
         if (error) throw new Error(error.message);
 
-        // 3. CEK RESPON DARI DATABASE
         if (!isSuccess) {
-            // Jika database mengembalikan FALSE (Saldo kurang)
             withdrawErrorMsg.textContent = 'Saldo tidak cukup untuk melakukan penarikan ini.';
             withdrawErrorMsg.style.display = 'block';
             withdrawAmountInput.style.borderColor = '#ff3333';
         } else {
-            // Jika database mengembalikan TRUE (Sukses)
             alert(`✅ Penarikan Rp ${amount.toLocaleString('id-ID')} berhasil diajukan!`);
             
-            // Reset Form
             withdrawAmountInput.value = '';
             withdrawBankSelect.value = '';
             
-            // Panggil ulang tampilan agar saldo di layar langsung terupdate
             if (typeof openDepositView === 'function') openDepositView(); 
         }
 
@@ -111,28 +118,12 @@ document.body.addEventListener('click', async function (e) {
     }
 });
 
-// Reset border merah & update nama rekening saat bank dipilih
-document.body.addEventListener('change', function (e) {
-    if (e.target.id !== 'withdrawBankSelect') return;
-    e.target.style.borderColor = '#555';
-    
-    const errMsg = document.getElementById('withdrawErrorMsg');
-    if (errMsg) errMsg.style.display = 'none';
-
-    const opt = e.target.options[e.target.selectedIndex];
-    const nameEl = document.getElementById('withdrawAccountName');
-    if (nameEl && opt && opt.dataset.accountName) {
-        nameEl.value = opt.dataset.accountName;
-    }
-});
-
 
 // ============================================================
-// BAGIAN 2: LOGIKA UI LAINNYA
+// BAGIAN 2: LOGIKA UI LAINNYA (VERSI LENGKAP)
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Guard: pastikan fungsi auth tersedia
     if (typeof generateCaptcha === 'function') {
         generateCaptcha();
     }
@@ -517,7 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const userId = currentSession.user.id;
 
         try {
-            // 1. AMBIL DATA DARI DATABASE
             const { data: profile, error: profileErr } = await supabaseClient
                 .from('profiles')
                 .select('username, email, account_name, bank_name, account_number, balance')
@@ -529,15 +519,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 2. SET USERNAME DEPOSIT
             const depositUsernameEl = document.getElementById('depositUsername');
             if (depositUsernameEl) depositUsernameEl.value = profile.username || '-';
 
-            // 3. SET NAMA REKENING
             const withdrawAccountNameEl = document.getElementById('withdrawAccountName');
             if (withdrawAccountNameEl) withdrawAccountNameEl.value = profile.account_name || '-';
 
-            // 4. SET DROPDOWN BANK
             const bankSelect = document.getElementById('withdrawBankSelect');
             if (bankSelect) {
                 bankSelect.innerHTML = '<option value="">- Silahkan pilih -</option>';
@@ -545,21 +532,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     const opt = document.createElement('option');
                     opt.value = profile.bank_name;
                     let maskedAcc = profile.account_number.length > 4 ? '****' + profile.account_number.slice(-4) : profile.account_number;
-                    opt.text = `${profile.bank_name} (${maskedAcc}) - ${profile.account_name}`;
+                    opt.text = `${profile.bank_name} (${maskedAcc}) - ${profile.account_name || ''}`;
                     opt.dataset.bankName = profile.bank_name;
                     opt.dataset.accountNumber = profile.account_number;
-                    opt.dataset.accountName = profile.account_name;
+                    opt.dataset.accountName = profile.account_name || '';
                     bankSelect.appendChild(opt);
                 } else {
                     const opt = document.createElement('option');
-                    opt.value = '';
                     opt.text = '⚠️ Belum ada rekening terdaftar';
                     opt.disabled = true;
                     bankSelect.appendChild(opt);
                 }
             }
 
-            // 5. TAMPILKAN SALDO
             const withdrawBalanceEl = document.getElementById('withdrawBalance');
             if (withdrawBalanceEl) {
                 const saldo = parseFloat(profile.balance) || 0;
