@@ -16,6 +16,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+    <!-- OVERLAY LOADING (Muncul saat pindah halaman) -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
     <div class="app-container">
         
         <!-- Header Global -->
@@ -41,7 +46,7 @@
         <!-- =========================================
              HALAMAN HOME
              ========================================= -->
-        <main id="homeView" class="page-view active">
+        <main id="homeView" class="page-view">
             <section class="banner-slider">
                 <div class="banner-track" id="bannerTrack">
                     <div class="banner-slide"><img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/b1.png" alt="Banner 1" draggable="false"></div>
@@ -115,11 +120,44 @@
                 <div class="stat-item"><div class="stat-icon-circle"><i class="fas fa-laptop"></i></div><div class="stat-label">ONLINE</div><div class="stat-number">64340</div></div>
             </section>
 
-            <section class="info-menu-box">
-                <div class="info-menu-item"><span class="info-menu-text">Cara Bermain SportsBook</span><button class="btn-lebihnya">Lebihnya</button></div>
-                <div class="info-menu-item"><span class="info-menu-text">Cara Bermain Slot</span><button class="btn-lebihnya">Lebihnya</button></div>
-                <div class="info-menu-item"><span class="info-menu-text">Cara Melakukan Deposit</span><button class="btn-lebihnya">Lebihnya</button></div>
-                <div class="info-menu-item"><span class="info-menu-text">Cara Melakukan Withdraw</span><button class="btn-lebihnya">Lebihnya</button></div>
+            <section class="info-menu-box" style="background: transparent; border: none;">
+                <div class="faq-item" style="margin-bottom: 10px;">
+                    <div class="faq-question"><span>Cara Melakukan Deposit</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer">
+                        <p><b>1. Cara melakukan setoran dana untuk akun NUSA138?</b><br>Setoran dana dapat ditransfer melalui kartu debit atau transfer bank.</p>
+                        <p><b>2. Mata uang apa yang dapat diterima oleh NUSA138?</b><br>NUSA138 untuk saat ini hanya menerima mata uang Rupiah.</p>
+                        <p><b>3. Dapatkah saya menggunakan lebih dari satu rekening bank untuk transaksi setoran?</b><br>Tidak ada ketentuan tentang jumlah rekening bank yang digunakan untuk transaksi setoran, namun nama lengkap pengirim dana/depositor rekening bank harus sama dengan nama rekening yang tercantum di NUSA138. Harap dicatat bahwa NUSA138 memiliki hak untuk menolak segala jenis transaksi yang dilakukan oleh nama pihak ketiga.</p>
+                        <p><b>4. Apakah slip transfer / pembayaran harus dikirim ke NUSA138 setelah saya mentransfer dana melalui bank?</b><br>Ini tidak wajib, tetapi dalam situasi tertentu, slip pembayaran Anda diperlukan untuk menyederhanakan proses transaksi Anda.</p>
+                        <p><b>5. Berapa lama untuk memproses transaksi deposit?</b><br>Proses deposit biasanya memakan waktu 1-3 menit setelah dana diterima oleh sistem kami.</p>
+                        <p><b>6. Di mana saya bisa mendapatkan informasi nomor akun NUSA138 dan berapa jumlah setoran minimum?</b><br>Silakan hubungi layanan pelanggan kami (online 24 jam) untuk mendapatkan informasi mengenai nomor akun dan jumlah minimum untuk transaksi deposit.</p>
+                        <p><b>7. Cara Deposit (Petunjuk Deposit)</b><br>
+                        1. Hubungi Layanan Pelanggan kami (online 24 jam) untuk mendapatkan informasi tentang nomor akun setoran NUSA138.<br>
+                        2. Silakan masuk ke situs web NUSA138 dan pilih "Transaksi > Deposit" pada Tab menu.<br>
+                        3. Formulir setoran harus diisi dengan menggunakan data yang valid dan benar.<br>
+                        4. Isi jumlah setoran tanpa simbol titik / koma. Misalnya: 1000 (seribu rupiah).<br>
+                        5. Masukkan tanggal dan waktu yang benar (pagi / malam).<br>
+                        6. Pilih promosi yang dipilih, jika ada.<br>
+                        7. Pilih "Kirim" dan harap tunggu sementara.<br>
+                        8. Deposit Anda sedang diproses.</p>
+                        <p><i>Harap dicatat bahwa setiap transaksi deposit (masuk / keluar dari promosi) harus disesuaikan dengan kebijakan yang telah ditentukan. NUSA138 memiliki hak untuk menolak segala jenis transaksi jika tidak mematuhi kebijakan. Untuk informasi lebih lanjut silakan hubungi perwakilan layanan pelanggan kami (online 24 jam).</i></p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question"><span>Cara Melakukan Withdraw</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer">
+                        <p><b>1. Bagaimana cara melakukan penarikan dana dari akun NUSA138?</b><br>Penarikan dana dapat ditransfer ke rekening/akun Anda melalui kartu debit atau transfer bank.</p>
+                        <p><b>2. Adakah persyaratan untuk rekening bank yang saya gunakan untuk transaksi Withdrawal?</b><br>Penting untuk dicatat bahwa nama penerima pembayaran yang dimasukkan untuk penarikan harus sama dengan nama akun yang tercantum di NUSA138. Harap perhatikan bahwa NUSA138 memiliki hak untuk menolak segala jenis transaksi yang dilakukan oleh nama pihak ketiga dan permintaan penarikan yang tidak memenuhi kebijakan yang disebutkan akan segera ditolak.</p>
+                        <p><b>3. Mata uang apa yang dapat diterima oleh NUSA138?</b><br>NUSA138 untuk saat ini hanya menerima mata uang Rupiah.</p>
+                        <p><b>4. Berapa lama untuk memproses transaksi penarikan?</b><br>Transaksi penarikan akan diproses dalam waktu 5 (lima) menit, namun pemrosesan mungkin memakan waktu lebih lama selama akhir pekan / offline bank / hari libur bank atau jika verifikasi akun diperlukan untuk beberapa kasus.</p>
+                        <p><b>5. Bagaimana cara withdraw?</b><br>
+                        1. Silakan masuk ke situs web NUSA138 dan pilih "Transaksi > Penarikan" pada Tab menu.<br>
+                        2. Isi jumlah penarikan tanpa simbol titik / koma. Misalnya: 1000 (seribu Rupiah).<br>
+                        3. Pilih jenis bank penarikan dan pilih opsi bank.<br>
+                        4. Formulir penarikan harus diisi menggunakan data yang benar / benar (nama lengkap, nomor rekening bank, nama bank, dll).<br>
+                        5. Pilih "Kirim" dan harap tunggu sementara penarikan Anda sedang diproses.</p>
+                        <p><i>Harap dicatat bahwa setiap transaksi penarikan (masuk / keluar dari promosi) harus disesuaikan dengan kebijakan yang telah ditentukan. NUSA138 memiliki hak untuk menolak segala jenis transaksi jika tidak mematuhi kebijakan. Untuk informasi lebih lanjut silakan hubungi perwakilan layanan pelanggan kami (online 24 jam).</i></p>
+                    </div>
+                </div>
             </section>
 
             <footer class="app-footer">
@@ -136,7 +174,10 @@
                     <div class="browser-icons"><i class="fab fa-chrome"></i><i class="fab fa-firefox-browser"></i><i class="fas fa-shield-halved"></i></div>
                 </div>
                 <div class="footer-links">
-                    <a href="#">Tentang kami</a> <span>|</span> <a href="#">Info Perbankan</a> <span>|</span> <a href="#">Pusat Info</a> <span>|</span> <a href="#">Hubungi kami</a>
+                    <a href="/about" data-link>Tentang kami</a> <span>|</span> 
+                    <a href="/banking" data-link>Info Perbankan</a> <span>|</span> 
+                    <a href="/about" data-link>Pusat Info</a> <span>|</span> 
+                    <a href="#">Hubungi kami</a>
                 </div>
                 <div class="footer-divider"></div>
                 <div class="footer-copyright">
@@ -150,6 +191,189 @@
                 </div>
             </footer>
         </main>
+
+        <!-- =========================================
+             HALAMAN TENTANG KAMI (FAQ)
+             ========================================= -->
+        <div id="aboutView" class="page-view">
+            <div class="faq-circle-container">
+                <div class="faq-circle">
+                    <i class="fas fa-question-circle" style="font-size: 24px; margin-bottom: 5px;"></i>
+                    <span>FAQ</span>
+                </div>
+            </div>
+            <div class="general-bar">General</div>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question"><span>1. Tentang NUSA138</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer">
+                        <p>NUSA138 adalah merek hiburan online yang melayani pasar Asia Pasifik, terutama Indonesia, Malaysia dan Cina. Produk yang ditawarkan terutama pada berbagai permainan online seperti taruhan sepakbola online, kasino online, slot, keno dan lotere, biner, poker, dan permainan lainnya.</p>
+                        <p>NUSA138 salah satu kasino terkemuka di Asia.</p>
+                        <p>Visi NUSA138 adalah untuk menyediakan hiburan berkualitas tinggi dan game bernilai tinggi bagi para pelanggannya. NUSA138 berkomitmen untuk menyediakan produk-produk permainan yang memimpin industri yang selalu didukung oleh promosi apa pun. Kelompok staf profesional disediakan untuk memastikan bahwa dengan bermain di NUSA138, Anda akan selalu mendapatkan pengalaman terbaik di sini.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question"><span>2. Kenapa NUSA138?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer">
+                        <p>Seiring dengan promosi yang terus-menerus NUSA138 menawarkan peluang terbaik dalam setidaknya 1.000 jenis game sportsbook online terkemuka di pasar seperti liga sepak bola mulai dari Inggris, Spanyol, Eropa, Jerman serta olahraga lain seperti NBA, NFL, NCAA, Tenis, F1, dan taruhan olahraga lainnya. Selain taruhan olahraga, NUSA138 juga menyediakan berbagai permainan langsung, didukung oleh dealer online kasino, melalui Lobi Live Kasino, Anda akan dibawa ke Live Baccarat, Live Sic Bo, Live Dragon Tiger, Live Roulette, Live Kasino, Slot dan game menarik lainnya.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question"><span>3. Afiliasi?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer"><p>Mohon maaf, saat ini Afiliasi sedang ditutup.</p></div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question"><span>4. Cara Bergabung?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer">
+                        <p>Bergabunglah sebagai ANGGOTA atau AGEN</p>
+                        <p><b>a. MEMBER :</b><br>1. Login ke situs web NUSA138, pilih menu "GABUNG"<br>2. Isi formulir pendaftaran yang disediakan. Semua informasi dibutuhkan oleh data yang valid / benar, lalu pilih "SUBMIT"<br>3. Email konfirmasi akan dikirim ke email yang terdaftar dan dimaksudkan untuk mengkonfirmasi nama pengguna dan kata sandi yang terdaftar.<br>4. Kembali ke situs NUSA138, pilih "LOGIN"<br>5. Anda dapat melanjutkan ke langkah selanjutnya yang akan dimulai dari Deposit.</p>
+                        <p><b>b. AGEN :</b><br>1. Masuk ke situs web NUSA138, pilih menu "AFILIASI"<br>2. Isi formulir pendaftaran yang disediakan. Semua informasi yang dibutuhkan oleh data yang benar / benar, kemudian pilih "KIRIM"<br>3. Email konfirmasi akan dikirim ke email terdaftar dan dimaksudkan untuk mengkonfirmasi dan mengaktifkan nama pengguna dan kata sandi yang terdaftar.<br>4. Formulir yang dikirimkan akan melalui proses seleksi oleh NUSA138.<br>5. Pemohon yang berhasil akan dihubungi oleh NUSA138 melalui email, terkait dengan yang telah ditentukan sebelumnya syarat dan ketentuan Afiliasi NUSA138.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question"><span>5. Mata uang apa yang digunakan di NUSA138?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer"><p>NUSA138 untuk saat ini hanya menerima mata uang Rupiah.</p></div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question"><span>6. Persyaratan usia ?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer"><p>Untuk bergabung, Anda harus menyetujui Persyaratan & Ketentuan dan berusia minimal 18 tahun atau lebih. Sebagian besar negara memiliki aturannya sendiri tentang permainan online dan karenanya Anda harus memastikan bahwa Anda mengetahui adanya peraturan dan mematuhi aturan mereka.</p></div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question"><span>7. Bagaimana cara melakukan deposit di akun NUSA138 ?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer"><p>Dana dapat disetorkan ke Akun NUSA138 Anda melalui sejumlah metode.</p></div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question"><span>8. Bagaimana saya bisa yakin bahwa permainan itu adil ?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer"><p>Kami memiliki profesional untuk menghitung persentase pembayaran untuk semua game kami, memastikan bahwa Anda dapat yakin bahwa game kami memenuhi peraturan keadilan standar industri.</p></div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question"><span>9. Apakah informasi pribadi saya aman ?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer"><p>Kami akan memastikan bahwa detail Anda aman setiap saat. Kami menggunakan langkah-langkah keamanan kualitas terbaik Secure Socket (enkripsi 128 128 enkripsi Standar) (Standar enkripsi 128 128 SSL) dan disimpan di lingkungan operasi yang aman yang memungkinkan pelanggan melakukan pembayaran online tidak pernah lebih aman. NUSA138 tidak akan mengungkapkan informasi pribadi Anda kepada pihak ketiga mana pun.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================
+             HALAMAN INFO PERBANKAN
+             ========================================= -->
+        <div id="bankingView" class="page-view">
+            <div class="faq-circle-container">
+                <div class="faq-circle">
+                    <i class="fas fa-question-circle" style="font-size: 24px; margin-bottom: 5px;"></i>
+                    <span>FAQ</span>
+                </div>
+            </div>
+            <div class="general-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
+                <span style="flex: 1; text-align: center; padding-left: 20px;">Banking</span>
+                <i class="fas fa-bars" style="font-size: 20px; color: #fff;"></i>
+            </div>
+            <div class="sub-nav-text">GeneralDepositsWithdrawalGamingTechnicalBanking</div>
+            <div class="banking-content">
+                <p>NUSA138 dikenal dengan transaksi yang efisien dan aman. Kelompok staf profesional disediakan untuk memastikan bahwa semua transaksi akan berjalan lancar dan aman.</p><br>
+                <p><b>BANK LISTS</b></p>
+                <p>Berikut adalah daftar detail perbankan yang disediakan NUSA138 Indonesia :</p><br>
+                <div style="overflow-x: auto;">
+                    <table class="bank-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">nama bank</th>
+                                <th rowspan="2">Status</th>
+                                <th rowspan="2">transaksi</th>
+                                <th rowspan="2">Metode Perbankan</th>
+                                <th colspan="2">limit transaksi</th>
+                                <th rowspan="2">waktu proses</th>
+                            </tr>
+                            <tr><th>Min</th><th>Max</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td rowspan="2" class="bank-name">BCA</td><td rowspan="2">Active</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
+                            <tr><td>Withdrawal</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                            <tr><td rowspan="2" class="bank-name">BRI</td><td rowspan="2">Active</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
+                            <tr><td>Withdrawal</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                            <tr><td rowspan="2" class="bank-name">BNI</td><td rowspan="2">Active</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
+                            <tr><td>Withdrawal</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                            <tr><td rowspan="2" class="bank-name">MANDIRI</td><td rowspan="2">Active</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
+                            <tr><td>Withdrawal</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                            <tr><td rowspan="2" class="bank-name">QRISSUPER</td><td rowspan="2">Inactive</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
+                            <tr><td>Withdrawal</td><td>Withdrawal</td><td>25,000</td><td>40,000,000</td><td>5 Min</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================
+             HALAMAN DEPOSIT
+             ========================================= -->
+        <div id="depositView" class="page-view">
+            <div class="deposit-tabs">
+                <div class="deposit-tab active" data-target="depositForm">Deposit</div>
+                <div class="deposit-tab" data-target="withdrawForm">Withdraw</div>
+                <div class="deposit-tab" data-target="transHistory">5 Transaksi Terakhir</div>
+            </div>
+
+            <!-- TAB DEPOSIT -->
+            <div id="depositForm" class="deposit-pane active">
+                <div class="deposit-card">
+                    <h3 class="deposit-title">DEPOSIT QRIS</h3>
+                    <p class="deposit-subtitle">(PROSES CEPAT, GAMPANG & AUTOMATIS)</p>
+
+                    <!-- AREA 1: FORM INPUT -->
+                    <div id="formInputArea">
+                        <div class="deposit-input-group">
+                            <label>Username</label>
+                            <input type="text" id="depositUsername" readonly>
+                        </div>
+
+                        <div class="deposit-input-group">
+                            <label>Pilih Bonus</label>
+                            <select id="depositBonus">
+                                <option value="">--- TANPA BONUS ---</option>
+                            </select>
+                        </div>
+
+                        <div class="deposit-input-group">
+                            <label>Nominal Deposit</label>
+                            <div class="input-prefix-wrapper">
+                                <span class="prefix">Rp</span>
+                                <input type="number" id="depositAmount" placeholder="0" min="20000">
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn-primary" id="btnShowQris">TAMPILKAN QRIS</button>
+                    </div>
+
+                    <!-- AREA 2: TAMPILAN QRIS (Awalnya Tersembunyi) -->
+                    <div id="qrisArea" style="display: none;">
+                        <div class="qris-box">
+                            <img id="qrisImage" src="" alt="QRIS Code">
+                        </div>
+                        <div class="qris-details">
+                            <p><span>Nominal Deposit</span> <span id="qrisNominal">: Rp 0</span></p>
+                            <p><span>Status</span> <span id="qrisStatus" style="color: #f5c451;">: Menunggu Pembayaran</span></p>
+                        </div>
+                        <a id="btnDownloadQris" href="#" download="QRIS_Payment.png" class="btn-primary" style="display: block; margin-top: 15px; text-decoration: none; text-align: center;">Download QRIS</a>
+                        <button type="button" class="btn-primary" id="btnBackToForm" style="background: #555; margin-top: 10px;">Kembali</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB WITHDRAW -->
+            <div id="withdrawForm" class="deposit-pane">
+                <div class="deposit-card" style="text-align: center; padding: 40px 20px;">
+                    <h3>Withdraw</h3>
+                    <p style="color: #aaa; margin-top: 10px;">Fitur penarikan dana sedang dalam pemeliharaan. Silakan hubungi CS.</p>
+                </div>
+            </div>
+
+            <!-- TAB 5 TRANSAKSI TERAKHIR -->
+            <div id="transHistory" class="deposit-pane">
+                <div class="deposit-card" style="text-align: center; padding: 40px 20px;">
+                    <h3>5 Transaksi Terakhir</h3>
+                    <p style="color: #aaa; margin-top: 10px;">Belum ada riwayat transaksi.</p>
+                </div>
+            </div>
+        </div>
 
         <!-- =========================================
              HALAMAN PROMO SAYA
@@ -410,20 +634,14 @@
              NAVIGASI BAWAH
              ========================================= -->
         <nav class="bottom-nav">
-            <a href="#" class="nav-item active" id="navHome"><i class="fas fa-home nav-icon"></i><span>HOME</span></a>
-            <a href="#" class="nav-item" id="navPromo"><i class="fas fa-gift nav-icon"></i><span>PROMO SAYA</span></a>
+            <a href="/home" data-link class="nav-item" id="navHome"><i class="fas fa-home nav-icon"></i><span>HOME</span></a>
+            <a href="/promo" data-link class="nav-item" id="navPromo"><i class="fas fa-gift nav-icon"></i><span>PROMO SAYA</span></a>
             
-            <a href="#" class="nav-item dana-nav-item" id="danaBtn">
+            <a href="/deposit" data-link class="nav-item dana-nav-item" id="danaBtn">
                 <div class="dana-icon-wrapper"><i class="fas fa-wallet nav-icon"></i></div><span>DANA</span>
-                <div class="dana-popup" id="danaPopup">
-                    <div class="dana-popup-item">Deposit</div>
-                    <div class="dana-popup-item">Withdraw</div>
-                    <div class="dana-popup-item">Pernyataan</div>
-                    <div class="dana-popup-arrow"></div>
-                </div>
             </a>
 
-            <a href="#" class="nav-item" id="navMemo"><i class="far fa-envelope nav-icon"></i><span>MEMO</span></a>
+            <a href="/memo" data-link class="nav-item" id="navMemo"><i class="far fa-envelope nav-icon"></i><span>MEMO</span></a>
             <a href="#" class="nav-item" id="navLiveChat"><i class="far fa-comment-dots nav-icon"></i><span>LIVE CHAT</span></a>
         </nav>
 
