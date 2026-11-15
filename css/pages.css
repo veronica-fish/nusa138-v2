@@ -94,3 +94,22 @@
 .qris-details p { display: flex; margin-bottom: 10px; }
 .qris-details span:first-child { flex: 1; }
 .qris-details span:last-child { font-weight: 600; }
+
+/* =========================================
+   HALAMAN WITHDRAW
+   ========================================= */
+.withdraw-container { padding: 20px; background: #000; }
+.withdraw-row { display: flex; align-items: flex-start; margin-bottom: 25px; }
+.withdraw-row label { width: 35%; font-size: 15px; font-weight: 700; color: #fff; margin-top: 5px; line-height: 1.3; }
+.wallet-option { display: flex; align-items: flex-start; gap: 15px; width: 65%; }
+.wallet-option input[type="radio"] { width: 20px; height: 20px; accent-color: #7b2cbf; margin-top: 2px; }
+.wallet-details { display: flex; flex-direction: column; }
+.wallet-name { font-size: 16px; font-weight: 600; color: #fff; }
+.wallet-balance { font-size: 14px; color: #aaa; margin-top: 2px; }
+.withdraw-input { width: 65%; background: transparent; border: 1px solid #555; color: #fff; padding: 12px; font-size: 15px; outline: none; border-radius: 2px; }
+.withdraw-input:focus { border-color: #fff; }
+.withdraw-input[readonly] { background: rgba(255, 255, 255, 0.05); color: #888; border: none; }
+.btn-withdraw { background: #4a00e0; color: #fff; border: none; padding: 12px 30px; font-size: 16px; font-weight: 500; cursor: pointer; margin-left: 35%; margin-bottom: 30px; }
+.withdraw-notice { border: 1px solid #555; padding: 15px; border-radius: 4px; }
+.withdraw-notice h4 { color: #fff; font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+.withdraw-notice p { color: #aaa; font-size: 12px; line-height: 1.5; }
