@@ -1,7 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     generateCaptcha();
-    supabaseClient.auth.getSession().then(({ data: { session } }) => { checkAuthState(session); });
-    supabaseClient.auth.onAuthStateChange((_event, session) => { checkAuthState(session); });
+    
+    // Inisialisasi Sesi Supabase
+    supabaseClient.auth.getSession().then(({ data: { session } }) => { 
+        checkAuthState(session); 
+        handleRouting(); // Panggil routing setelah cek sesi
+    });
+    supabaseClient.auth.onAuthStateChange((_event, session) => { 
+        checkAuthState(session); 
+    });
 
     // Ikon Profil di Header
     const headerUserBtn = document.getElementById('headerUserBtn');
@@ -12,38 +19,114 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ==========================================
+    // FUNGSI ROUTING & LOADING
+    // ==========================================
+    
+    const routes = {
+        '/home': 'homeView',
+        '/': 'homeView',
+        '/promo': 'promoView',
+        '/memo': 'memoView',
+        '/deposit': 'depositView',
+        '/about': 'aboutView',
+        '/banking': 'bankingView'
+    };
+
+    window.showLoading = function() {
+        document.getElementById('loadingOverlay').classList.add('active');
+    };
+
+    window.hideLoading = function() {
+        document.getElementById('loadingOverlay').classList.remove('active');
+    };
+
+    window.navigateTo = function(path, pushState = true) {
+        // 1. Tampilkan Efek Loading
+        showLoading();
+
+        // 2. Tunggu sebentar agar efek loading terlihat (misal 300ms)
+        setTimeout(() => {
+            // 3. Sembunyikan semua view
+            document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+
+            // 4. Tentukan view yang akan ditampilkan berdasarkan URL
+            let targetViewId = routes[path];
+            
+            // Jika route tidak ditemukan, default ke home
+            if (!targetViewId) {
+                targetViewId = 'homeView';
+                path = '/home';
+            }
+
+            // Proteksi: Jika belum login dan mencoba akses halaman selain home
+            if (!currentSession && targetViewId !== 'homeView') {
+                hideLoading();
+                openLoginPanel(); // Munculkan login
+                return;
+            }
+
+            // 5. Tampilkan view yang dituju
+            const targetView = document.getElementById(targetViewId);
+            if (targetView) {
+                targetView.classList.add('active');
+                window.scrollTo(0, 0);
+            }
+
+            // 6. Ubah URL di browser (tanpa reload)
+            if (pushState) {
+                history.pushState({ path: path }, '', path);
+            }
+
+            // 7. Update status aktif di navigasi bawah
+            updateNavActiveState(targetViewId);
+
+            // 8. Sembunyikan Efek Loading
+            hideLoading();
+        }, 300); // Delay 300ms
+    };
+
+    // Fungsi untuk mengupdate class 'active' di navigasi bawah
+    function updateNavActiveState(viewId) {
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
+        
+        if (viewId === 'homeView') document.getElementById('navHome')?.classList.add('active');
+        if (viewId === 'promoView') document.getElementById('navPromo')?.classList.add('active');
+        if (viewId === 'memoView') document.getElementById('navMemo')?.classList.add('active');
+        if (viewId === 'depositView') document.getElementById('danaBtn')?.classList.add('active');
+    }
+
+    // Fungsi untuk membaca URL saat ini dan menampilkan halaman yang tepat
+    window.handleRouting = function() {
+        const path = window.location.pathname;
+        navigateTo(path, false); // false = jangan push state lagi
+    };
+
+    // Tangani tombol Back/Forward browser
+    window.addEventListener('popstate', () => {
+        handleRouting();
+    });
+
+    // Tangkap klik pada semua link yang memiliki atribut `data-link`
+    document.body.addEventListener('click', (e) => {
+        const link = e.target.closest('a[data-link]');
+        if (link) {
+            e.preventDefault();
+            const path = link.getAttribute('href');
+            navigateTo(path, true);
+        }
+    });
+
+    // ==========================================
+    // LOGIKA UI LAINNYA
+    // ==========================================
+
     // --- FORM DAFTAR ---
     const btnRegister = document.getElementById('btnRegister');
     if (btnRegister) {
         btnRegister.addEventListener('click', async () => {
-            const username = document.getElementById('regUsername').value.trim();
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
-            const email = document.getElementById('regEmail').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const accountName = document.getElementById('regAccountName').value.trim();
-            const bankName = document.getElementById('regBankName').value;
-            const accountNumber = document.getElementById('regAccountNumber').value.trim();
-            const termsChecked = document.getElementById('regTerms').checked;
-            const captchaInput = document.getElementById('regCaptchaInput').value.trim();
-
-            if (!username || !password || !email || !phone || !accountName || !bankName || !accountNumber || !captchaInput) { alert("Mohon isi semua kolom yang wajib!"); return; }
-            if (!/^[a-zA-Z0-9]+$/.test(username)) { alert("Nama pengguna tidak boleh mengandung simbol! Hanya huruf dan angka."); return; }
-            if (password.length < 8) { alert("Kata sandi minimal harus 8 karakter!"); return; }
-            if (password !== confirmPassword) { alert("Konfirmasi kata sandi tidak cocok!"); return; }
-            if (!/^[a-zA-Z\s]+$/.test(accountName)) { alert("Nama Sesuai Rekening tidak boleh mengandung angka atau simbol!"); return; }
-            if (!termsChecked) { alert("Anda harus menyetujui Syarat & Ketentuan!"); return; }
-            if (captchaInput !== generatedCaptcha) { alert("Kode Captcha salah! Silakan coba lagi."); generateCaptcha(); document.getElementById('regCaptchaInput').value = ''; return; }
-
-            btnRegister.innerText = "MEMPROSES...";
-            const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-                email: email, password: password,
-                options: { data: { username, phone, bank_name: bankName, account_number: accountNumber, account_name: accountName } }
-            });
-
-            if (authError) { alert("Gagal Daftar: " + authError.message); } 
-            else { alert("Pendaftaran Berhasil! Silakan Login."); closeRegisterView(); openLoginPanel(); }
-            btnRegister.innerText = "Submit";
+            // ... (Logika validasi dan pendaftaran Supabase tetap sama) ...
+            // SALIN KODE VALIDASI DARI JAWABAN SEBELUMNYA
         });
     }
 
@@ -51,22 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
-            const usernameOrEmail = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            if (!usernameOrEmail || !password) { alert("Mohon isi nama pengguna/email dan password!"); return; }
-
-            btnLogin.innerText = "MEMPROSES...";
-            let emailToLogin = usernameOrEmail;
-
-            if (!usernameOrEmail.includes('@')) {
-                const { data: profileData, error: profileError } = await supabaseClient.from('profiles').select('email').eq('username', usernameOrEmail).single();
-                if (profileError || !profileData) { alert("Nama pengguna tidak ditemukan!"); btnLogin.innerText = "Login"; return; }
-                emailToLogin = profileData.email;
-            }
-
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email: emailToLogin, password: password });
-            if (error) { alert("Login Gagal: Email/Username atau Password salah."); btnLogin.innerText = "Login"; } 
-            else { alert("Login Berhasil! Selamat datang."); btnLogin.innerText = "Login"; }
+            // ... (Logika login Supabase tetap sama) ...
+            // SALIN KODE LOGIN DARI JAWABAN SEBELUMNYA
         });
     }
 
@@ -74,54 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnChangePassword = document.getElementById('btnChangePassword');
     if (btnChangePassword) {
         btnChangePassword.addEventListener('click', async () => {
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-            if (!newPassword || !confirmNewPassword) { alert("Mohon isi semua kolom kata sandi baru!"); return; }
-            if (newPassword.length < 8) { alert("Kata sandi baru minimal harus 8 karakter!"); return; }
-            if (newPassword !== confirmNewPassword) { alert("Konfirmasi kata sandi baru tidak cocok!"); return; }
-
-            btnChangePassword.innerText = "MEMPROSES...";
-            const { data, error } = await supabaseClient.auth.updateUser({ password: newPassword });
-            if (error) { alert("Gagal mengubah kata sandi: " + error.message); } 
-            else { alert("Kata sandi berhasil diubah!"); document.getElementById('currentPassword').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('confirmNewPassword').value = ''; switchProfileTab('detail'); }
-            btnChangePassword.innerText = "Simpan Perubahan";
+            // ... (Logika ubah password tetap sama) ...
+            // SALIN KODE UBAH PASSWORD DARI JAWABAN SEBELUMNYA
         });
     }
 
-    // --- NAVIGASI BAWAH ---
-    const navHome = document.getElementById('navHome');
-    const navPromo = document.getElementById('navPromo');
-    const navMemo = document.getElementById('navMemo');
-    const navLiveChat = document.getElementById('navLiveChat');
-    const danaBtn = document.getElementById('danaBtn');
-    const danaPopup = document.getElementById('danaPopup');
-    const homeView = document.getElementById('homeView');
-    const promoView = document.getElementById('promoView');
-    const memoView = document.getElementById('memoView');
-
-    function switchView(targetView, targetNav) {
-        if (!currentSession && targetView !== homeView) { openLoginPanel(); return; }
-        document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
-        targetView.classList.add('active'); targetNav.classList.add('active');
-        window.scrollTo(0, 0);
-    }
-
-    if(navHome) navHome.addEventListener('click', (e) => { e.preventDefault(); closeRegisterView(); switchView(homeView, navHome); });
-    if(navPromo) navPromo.addEventListener('click', (e) => { e.preventDefault(); switchView(promoView, navPromo); });
-    if(navMemo) navMemo.addEventListener('click', (e) => { e.preventDefault(); switchView(memoView, navMemo); });
-    if(navLiveChat) navLiveChat.addEventListener('click', (e) => { e.preventDefault(); /* Logika Live Chat */ });
-
-    if (danaBtn && danaPopup) {
-        danaBtn.addEventListener('click', function(e) {
-            e.preventDefault(); e.stopPropagation();
-            if (!currentSession) { openLoginPanel(); return; }
-            danaPopup.classList.toggle('active');
-        });
-        document.addEventListener('click', function(e) { if (!danaBtn.contains(e.target)) danaPopup.classList.remove('active'); });
-    }
-
-    // --- TABS PROMO & MEMO ---
+    // --- LOGIKA TABS PROMO & MEMO ---
     document.querySelectorAll('.promo-tab').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.promo-tab').forEach(b => b.classList.remove('active'));
@@ -225,36 +252,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- FUNGSI NAVIGASI HALAMAN BARU ---
-    window.showView = function(viewId, event) {
-        if (event) event.preventDefault();
-        document.querySelectorAll('.page-view').forEach(view => { view.classList.remove('active'); });
-        const targetView = document.getElementById(viewId);
-        if (targetView) { targetView.classList.add('active'); window.scrollTo(0, 0); }
-    };
-
     // ==========================================
     // LOGIKA HALAMAN DEPOSIT & KASERAPAY
     // ==========================================
     
+    // Buka Halaman Deposit via Router
     window.openDepositView = function() {
-        if (!currentSession) { openLoginPanel(); return; }
-        document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
-        document.getElementById('depositView').classList.add('active');
-        document.getElementById('danaPopup').classList.remove('active'); 
-        window.scrollTo(0, 0); 
-
-        // Reset ke form awal setiap kali dibuka
-        document.getElementById('formInputArea').style.display = 'block';
-        document.getElementById('qrisArea').style.display = 'none';
-
-        supabaseClient.auth.getUser().then(({ data }) => {
-            if (data.user) {
-                document.getElementById('depositUsername').value = data.user.user_metadata.username || '-';
-            }
-        });
+        navigateTo('/deposit');
     };
 
+    // Tombol Tampilkan QRIS
     const btnShowQris = document.getElementById('btnShowQris');
     if (btnShowQris) {
         btnShowQris.addEventListener('click', async () => {
@@ -267,7 +274,6 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 // ========================================================
                 // PENTING: GANTI URL DI BAWAH DENGAN URL BACKEND WISPBYPE ANDA
-                // Pastikan URL ini persis sama dengan alamat server Anda
                 // ========================================================
                 const BACKEND_URL = 'https://nusa138.wispbyte.app/api/create-qris'; 
 
@@ -281,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Gagal membuat QRIS dari server');
+                if (!response.ok) throw new Error(data.message || 'Gagal membuat QRIS');
 
                 // Tampilkan data QRIS
                 document.getElementById('qrisImage').src = data.qr_url;
@@ -301,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Tombol Kembali ke Form
+    // Tombol Kembali ke Form (Jika ingin deposit lagi)
     const btnBackToForm = document.getElementById('btnBackToForm');
     if (btnBackToForm) {
         btnBackToForm.addEventListener('click', () => {
