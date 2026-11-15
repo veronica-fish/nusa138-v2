@@ -1,5 +1,6 @@
 // ============================================================
-// BAGIAN 1: WITHDRAW & FORMAT ANGKA (EVENT DELEGATION)
+// BAGIAN 1: WITHDRAW & FORMAT ANGKA (ANTI-HACK RPC)
+// Diletakkan paling atas agar selalu berfungsi
 // ============================================================
 
 // Format angka otomatis (titik ribuan) di input withdraw
@@ -33,7 +34,7 @@ document.body.addEventListener('change', function (e) {
     }
 });
 
-// Handler klik tombol Withdraw (Menggunakan RPC Anti-Hack)
+// Handler klik tombol Withdraw (Verifikasi Saldo di Server)
 document.body.addEventListener('click', async function (e) {
     const btn = e.target.closest('#btnWithdraw');
     if (!btn) return;
@@ -105,6 +106,7 @@ document.body.addEventListener('click', async function (e) {
             withdrawAmountInput.value = '';
             withdrawBankSelect.value = '';
             
+            // Panggil ulang untuk update saldo
             if (typeof openDepositView === 'function') openDepositView(); 
         }
 
@@ -120,7 +122,7 @@ document.body.addEventListener('click', async function (e) {
 
 
 // ============================================================
-// BAGIAN 2: LOGIKA UI LAINNYA (VERSI LENGKAP)
+// BAGIAN 2: LOGIKA UI LAINNYA
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -151,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // FUNGSI ROUTING & LOADING
+    // FUNGSI ROUTING & LOADING (DIPERBAIKI)
     // ==========================================
     const routes = {
         '/home': 'homeView',
@@ -195,6 +197,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetView) {
                 targetView.classList.add('active');
                 window.scrollTo(0, 0);
+            }
+
+            // ⚠️ KUNCI PERBAIKAN: Jika masuk halaman Deposit, langsung tarik data dari DB
+            if (targetViewId === 'depositView') {
+                if (typeof openDepositView === 'function') {
+                    openDepositView(); 
+                }
             }
 
             if (pushState) {
