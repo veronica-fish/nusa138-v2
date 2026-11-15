@@ -1,5 +1,5 @@
 // ============================================================
-// BAGIAN 1: WITHDRAW & FORMAT ANGKA (EVENT DELEGATION)
+// BAGIAN 1: WITHDRAW & FORMAT ANGKA (SISTEM ANTI-HACK RPC)
 // Diletakkan di luar DOMContentLoaded agar selalu berfungsi
 // ============================================================
 
@@ -19,15 +19,13 @@ document.body.addEventListener('input', function (e) {
     e.target.style.borderColor = '#555';
 });
 
-// Handler klik tombol Withdraw (Verifikasi Saldo & Update Database)
+// Handler klik tombol Withdraw (Verifikasi Saldo di Server)
 document.body.addEventListener('click', async function (e) {
     const btn = e.target.closest('#btnWithdraw');
     if (!btn) return;
 
     e.preventDefault();
-    console.log('🔍 [Withdraw] Tombol diklik');
-
-    // Guard: user harus login
+    
     if (typeof currentSession === 'undefined' || !currentSession || !currentSession.user) {
         alert('Silakan login terlebih dahulu.');
         if (typeof openLoginPanel === 'function') openLoginPanel();
@@ -38,11 +36,7 @@ document.body.addEventListener('click', async function (e) {
     const withdrawErrorMsg = document.getElementById('withdrawErrorMsg');
     const withdrawBankSelect = document.getElementById('withdrawBankSelect');
 
-    if (!withdrawAmountInput || !withdrawErrorMsg || !withdrawBankSelect) {
-        console.error('❌ [Withdraw] Elemen tidak lengkap!');
-        alert('Terjadi kesalahan sistem. Silakan refresh halaman.');
-        return;
-    }
+    if (!withdrawAmountInput || !withdrawErrorMsg || !withdrawBankSelect) return;
 
     // 1. VALIDASI INPUT DASAR
     const amountStr = withdrawAmountInput.value.replace(/[.,\s]/g, '');
@@ -57,7 +51,6 @@ document.body.addEventListener('click', async function (e) {
         withdrawErrorMsg.textContent = 'Minimal penarikan adalah Rp 50.000';
         withdrawErrorMsg.style.display = 'block';
         withdrawAmountInput.style.borderColor = '#ff3333';
-        withdrawAmountInput.focus();
         return;
     }
 
@@ -65,99 +58,52 @@ document.body.addEventListener('click', async function (e) {
         withdrawErrorMsg.textContent = 'Silakan pilih akun bank yang terdaftar!';
         withdrawErrorMsg.style.display = 'block';
         withdrawBankSelect.style.borderColor = '#ff3333';
-        withdrawBankSelect.focus();
         return;
     }
 
-    // 2. AMBIL DETAIL REKENING DARI option.dataset
     const selectedOption = withdrawBankSelect.options[withdrawBankSelect.selectedIndex];
     const bankName = selectedOption.dataset.bankName || selectedBankValue;
     const accountNumber = selectedOption.dataset.accountNumber || '';
     const accountName = selectedOption.dataset.accountName || '';
-
-    if (!accountNumber || !accountName) {
-        console.error('❌ Data rekening tidak lengkap di option dataset');
-        alert('Data rekening tidak lengkap. Silakan refresh dan login ulang.');
-        return;
-    }
 
     btn.disabled = true;
     const originalText = btn.innerText;
     btn.innerText = 'MEMPROSES...';
 
     try {
-        const userId = currentSession.user.id;
-
-        // 3. VERIFIKASI SALDO REAL-TIME DARI DATABASE
-        const { data: profile, error: profileErr } = await supabaseClient
-            .from('profiles')
-            .select('balance')
-            .eq('id', userId)
-            .single();
-
-        if (profileErr || !profile) throw new Error('Gagal mengambil data saldo.');
-
-        const currentBalance = parseFloat(profile.balance) || 0;
-        console.log('💰 Saldo user:', currentBalance, '| Withdraw:', amount);
-
-        // Cek apakah saldo cukup
-        if (currentBalance < amount) {
-            withdrawErrorMsg.textContent = `Saldo tidak cukup! Saldo Anda: IDR ${currentBalance.toLocaleString('id-ID')}`;
-            withdrawErrorMsg.style.display = 'block';
-            withdrawAmountInput.style.borderColor = '#ff3333';
-            btn.innerText = originalText;
-            btn.disabled = false;
-            return;
-        }
-
-        // 4. PROSES POTONG SALDO DI DATABASE
-        const { error: updateErr } = await supabaseClient
-            .from('profiles')
-            .update({ balance: currentBalance - amount })
-            .eq('id', userId);
-
-        if (updateErr) throw new Error('Gagal memproses pemotongan saldo.');
-
-        // 5. CATAT KE TABEL TRANSAKSI
-        try {
-            await supabaseClient.from('transactions').insert({
-                user_id: userId,
-                type: 'WITHDRAW',
+        // 2. PANGGIL RPC DATABASE (Proses potong saldo dilakukan oleh Supabase)
+        const { data: isSuccess, error } = await supabaseClient.rpc('request_withdraw', {
+            payload: {
                 amount: amount,
                 bank_name: bankName,
                 account_number: accountNumber,
-                account_name: accountName,
-                status: 'PENDING',
-                created_at: new Date().toISOString()
-            });
-        } catch (txErr) {
-            console.warn('⚠️ Gagal catat transaksi (tidak fatal):', txErr);
+                account_name: accountName
+            }
+        });
+
+        if (error) throw new Error(error.message);
+
+        // 3. CEK RESPON DARI DATABASE
+        if (!isSuccess) {
+            // Jika database mengembalikan FALSE (Saldo kurang)
+            withdrawErrorMsg.textContent = 'Saldo tidak cukup untuk melakukan penarikan ini.';
+            withdrawErrorMsg.style.display = 'block';
+            withdrawAmountInput.style.borderColor = '#ff3333';
+        } else {
+            // Jika database mengembalikan TRUE (Sukses)
+            alert(`✅ Penarikan Rp ${amount.toLocaleString('id-ID')} berhasil diajukan!`);
+            
+            // Reset Form
+            withdrawAmountInput.value = '';
+            withdrawBankSelect.value = '';
+            
+            // Panggil ulang tampilan agar saldo di layar langsung terupdate
+            if (typeof openDepositView === 'function') openDepositView(); 
         }
-
-        // 6. SUKSES
-        alert(`✅ Permintaan penarikan Rp ${amount.toLocaleString('id-ID')} berhasil!\n\nTujuan: ${bankName} - ${accountNumber}\nAtas nama: ${accountName}\n\nStatus: Menunggu verifikasi admin.`);
-
-        // Reset Form
-        withdrawAmountInput.value = '';
-        withdrawBankSelect.value = '';
-        withdrawBankSelect.style.borderColor = '#555';
-
-        // Update tampilan saldo di form
-        const withdrawBalanceEl = document.getElementById('withdrawBalance');
-        if (withdrawBalanceEl) {
-            const newBal = currentBalance - amount;
-            withdrawBalanceEl.innerText = 'IDR ' + newBal.toLocaleString('id-ID', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
-
-        // Update saldo di header atas
-        if (typeof checkAuthState === 'function') checkAuthState(currentSession);
 
     } catch (err) {
         console.error('❌ Error withdraw:', err);
-        withdrawErrorMsg.textContent = 'Terjadi kesalahan: ' + err.message;
+        withdrawErrorMsg.textContent = 'Terjadi kesalahan sistem: ' + err.message;
         withdrawErrorMsg.style.display = 'block';
     } finally {
         btn.innerText = originalText;
@@ -436,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 refreshBtn.style.transform = 'rotate(0deg)';
                 refreshBtn.style.transition = 'none';
             }, 400);
+            if (typeof openDepositView === 'function') openDepositView();
         });
     }
 
@@ -547,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // HALAMAN DEPOSIT & QRIS (UPDATE DATABASE)
+    // HALAMAN DEPOSIT & QRIS (SINKRONISASI DATABASE)
     // ==========================================
     window.openDepositView = async function () {
         if (!currentSession) { openLoginPanel(); return; }
