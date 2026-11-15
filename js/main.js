@@ -197,6 +197,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // --- TABS HALAMAN DEPOSIT / WITHDRAW / HISTORY (TAMBAHAN BARU) ---
+    document.querySelectorAll('.deposit-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.deposit-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.deposit-pane').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            const targetId = this.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
+        });
+    });
+
     // --- REFRESH SALDO ---
     const refreshBtn = document.querySelector('.refresh-btn');
     if (refreshBtn) {
@@ -298,23 +309,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if(danaPopup) danaPopup.classList.remove('active'); 
         window.scrollTo(0, 0); 
 
-        // Reset ke form awal
         document.getElementById('formInputArea').style.display = 'block';
         document.getElementById('qrisArea').style.display = 'none';
 
-        // ISI DATA OTOMATIS
         if (currentSession && currentSession.user) {
             const metadata = currentSession.user.user_metadata;
             
-            // 1. Isi Username (Deposit)
             let usernameTeks = metadata.username || currentSession.user.email.split('@')[0] || "-";
             document.getElementById('depositUsername').value = usernameTeks;
 
-            // 2. Isi Nama Rekening (Withdraw)
             let accName = metadata.account_name || "-";
             document.getElementById('withdrawAccountName').value = accName;
 
-            // 3. Isi Dropdown Bank (Withdraw) - Menggunakan data dari pendaftaran
             const bankSelect = document.getElementById('withdrawBankSelect');
             bankSelect.innerHTML = '<option value="">- Silahkan pilih -</option>';
             if (metadata.bank_name && metadata.account_number) {
@@ -368,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Tombol Kembali ke Form
     const btnBackToForm = document.getElementById('btnBackToForm');
     if (btnBackToForm) {
         btnBackToForm.addEventListener('click', () => {
