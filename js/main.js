@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const navHome = document.getElementById('navHome');
     const navPromo = document.getElementById('navPromo');
     const navMemo = document.getElementById('navMemo');
+    const navLiveChat = document.getElementById('navLiveChat');
     const danaBtn = document.getElementById('danaBtn');
     const danaPopup = document.getElementById('danaPopup');
     const homeView = document.getElementById('homeView');
@@ -100,9 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function switchView(targetView, targetNav) {
         if (!currentSession && targetView !== homeView) { openLoginPanel(); return; }
-        homeView.classList.remove('active'); promoView.classList.remove('active'); memoView.classList.remove('active');
+        document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
         targetView.classList.add('active'); targetNav.classList.add('active');
+        window.scrollTo(0, 0);
     }
 
     if(navHome) navHome.addEventListener('click', (e) => { e.preventDefault(); closeRegisterView(); switchView(homeView, navHome); });
@@ -196,5 +198,116 @@ document.addEventListener('DOMContentLoaded', () => {
             transInterval = setInterval(() => { transIndex++; if (transIndex >= totalPages) { transIndex = 0; populateCards(); } goToTransSlide(transIndex); }, 4000); 
         }
         populateCards(); startTransSlider();
+    }
+
+    // --- LOGIKA FAQ ACCORDION ---
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    faqQuestions.forEach(question => {
+        question.addEventListener('click', function() {
+            const answer = this.nextElementSibling;
+            const icon = this.querySelector('i');
+            
+            if (answer.style.maxHeight) {
+                answer.style.maxHeight = null;
+                icon.classList.remove('fa-minus');
+                icon.classList.add('fa-plus');
+            } else {
+                document.querySelectorAll('.faq-answer').forEach(ans => ans.style.maxHeight = null);
+                document.querySelectorAll('.faq-question i').forEach(ic => {
+                    ic.classList.remove('fa-minus');
+                    ic.classList.add('fa-plus');
+                });
+
+                answer.style.maxHeight = answer.scrollHeight + "px";
+                icon.classList.remove('fa-plus');
+                icon.classList.add('fa-minus');
+            }
+        });
+    });
+
+    // --- FUNGSI NAVIGASI HALAMAN BARU ---
+    window.showView = function(viewId, event) {
+        if (event) event.preventDefault();
+        document.querySelectorAll('.page-view').forEach(view => { view.classList.remove('active'); });
+        const targetView = document.getElementById(viewId);
+        if (targetView) { targetView.classList.add('active'); window.scrollTo(0, 0); }
+    };
+
+    // ==========================================
+    // LOGIKA HALAMAN DEPOSIT & KASERAPAY
+    // ==========================================
+    
+    window.openDepositView = function() {
+        if (!currentSession) { openLoginPanel(); return; }
+        document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+        document.getElementById('depositView').classList.add('active');
+        document.getElementById('danaPopup').classList.remove('active'); 
+        window.scrollTo(0, 0); 
+
+        // Reset ke form awal setiap kali dibuka
+        document.getElementById('formInputArea').style.display = 'block';
+        document.getElementById('qrisArea').style.display = 'none';
+
+        supabaseClient.auth.getUser().then(({ data }) => {
+            if (data.user) {
+                document.getElementById('depositUsername').value = data.user.user_metadata.username || '-';
+            }
+        });
+    };
+
+    const btnShowQris = document.getElementById('btnShowQris');
+    if (btnShowQris) {
+        btnShowQris.addEventListener('click', async () => {
+            const amount = parseInt(document.getElementById('depositAmount').value);
+            if (!amount || amount < 20000) { alert("Minimal deposit adalah Rp 20.000!"); return; }
+
+            btnShowQris.innerText = "MEMPROSES...";
+            btnShowQris.disabled = true;
+
+            try {
+                // ========================================================
+                // PENTING: GANTI URL DI BAWAH DENGAN URL BACKEND WISPBYPE ANDA
+                // Pastikan URL ini persis sama dengan alamat server Anda
+                // ========================================================
+                const BACKEND_URL = 'https://nusa138.wispbyte.app/api/create-qris'; 
+
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        amount: amount, 
+                        username: document.getElementById('depositUsername').value 
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Gagal membuat QRIS dari server');
+
+                // Tampilkan data QRIS
+                document.getElementById('qrisImage').src = data.qr_url;
+                document.getElementById('qrisNominal').innerText = ": Rp " + amount.toLocaleString('id-ID');
+                document.getElementById('btnDownloadQris').href = data.qr_url;
+
+                // TRIK UTAMA: Tukar tampilan (Form hilang, QRIS muncul)
+                document.getElementById('formInputArea').style.display = 'none';
+                document.getElementById('qrisArea').style.display = 'block';
+
+            } catch (error) {
+                alert("Gagal menampilkan QRIS: " + error.message);
+            } finally {
+                btnShowQris.innerText = "TAMPILKAN QRIS";
+                btnShowQris.disabled = false;
+            }
+        });
+    }
+
+    // Tombol Kembali ke Form
+    const btnBackToForm = document.getElementById('btnBackToForm');
+    if (btnBackToForm) {
+        btnBackToForm.addEventListener('click', () => {
+            document.getElementById('qrisArea').style.display = 'none';
+            document.getElementById('formInputArea').style.display = 'block';
+            document.getElementById('depositAmount').value = ''; 
+        });
     }
 });
