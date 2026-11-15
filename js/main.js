@@ -1,8 +1,6 @@
 // ============================================================
-// BAGIAN 1: WITHDRAW — EVENT DELEGATION
-// Diletakkan di LUAR DOMContentLoaded, paling atas file.
-// Tujuan: tombol withdraw SELALU berfungsi walau ada error
-// di kode lain (generateCaptcha, auth, routing, dll).
+// BAGIAN 1: WITHDRAW & FORMAT ANGKA (EVENT DELEGATION)
+// Diletakkan di luar DOMContentLoaded agar selalu berfungsi
 // ============================================================
 
 // Format angka otomatis (titik ribuan) di input withdraw
@@ -21,40 +19,40 @@ document.body.addEventListener('input', function (e) {
     e.target.style.borderColor = '#555';
 });
 
-// Handler klik tombol Withdraw
-document.body.addEventListener('click', function (e) {
+// Handler klik tombol Withdraw (Verifikasi Saldo & Update Database)
+document.body.addEventListener('click', async function (e) {
     const btn = e.target.closest('#btnWithdraw');
     if (!btn) return;
 
     e.preventDefault();
     console.log('🔍 [Withdraw] Tombol diklik');
 
+    // Guard: user harus login
+    if (typeof currentSession === 'undefined' || !currentSession || !currentSession.user) {
+        alert('Silakan login terlebih dahulu.');
+        if (typeof openLoginPanel === 'function') openLoginPanel();
+        return;
+    }
+
     const withdrawAmountInput = document.getElementById('withdrawAmount');
     const withdrawErrorMsg = document.getElementById('withdrawErrorMsg');
     const withdrawBankSelect = document.getElementById('withdrawBankSelect');
 
-    // Guard: pastikan semua elemen ada
     if (!withdrawAmountInput || !withdrawErrorMsg || !withdrawBankSelect) {
-        console.error('❌ [Withdraw] Elemen tidak lengkap!', {
-            withdrawAmountInput: !!withdrawAmountInput,
-            withdrawErrorMsg: !!withdrawErrorMsg,
-            withdrawBankSelect: !!withdrawBankSelect
-        });
+        console.error('❌ [Withdraw] Elemen tidak lengkap!');
         alert('Terjadi kesalahan sistem. Silakan refresh halaman.');
         return;
     }
 
+    // 1. VALIDASI INPUT DASAR
     const amountStr = withdrawAmountInput.value.replace(/[.,\s]/g, '');
     const amount = parseInt(amountStr, 10);
-    const bank = withdrawBankSelect.value;
-
-    console.log('🔍 [Withdraw] Data:', { amountStr, amount, bank });
+    const selectedBankValue = withdrawBankSelect.value;
 
     withdrawErrorMsg.style.display = 'none';
     withdrawAmountInput.style.borderColor = '#555';
     withdrawBankSelect.style.borderColor = '#555';
 
-    // Validasi: minimal Rp 50.000
     if (!amount || isNaN(amount) || amount < 50000) {
         withdrawErrorMsg.textContent = 'Minimal penarikan adalah Rp 50.000';
         withdrawErrorMsg.style.display = 'block';
@@ -63,8 +61,7 @@ document.body.addEventListener('click', function (e) {
         return;
     }
 
-    // Validasi: bank wajib dipilih
-    if (!bank) {
+    if (!selectedBankValue) {
         withdrawErrorMsg.textContent = 'Silakan pilih akun bank yang terdaftar!';
         withdrawErrorMsg.style.display = 'block';
         withdrawBankSelect.style.borderColor = '#ff3333';
@@ -72,46 +69,139 @@ document.body.addEventListener('click', function (e) {
         return;
     }
 
-    // Sukses
-    alert(`Permintaan penarikan sebesar Rp ${amount.toLocaleString('id-ID')} sedang diproses.`);
-    withdrawAmountInput.value = '';
-    withdrawBankSelect.style.borderColor = '#555';
+    // 2. AMBIL DETAIL REKENING DARI option.dataset
+    const selectedOption = withdrawBankSelect.options[withdrawBankSelect.selectedIndex];
+    const bankName = selectedOption.dataset.bankName || selectedBankValue;
+    const accountNumber = selectedOption.dataset.accountNumber || '';
+    const accountName = selectedOption.dataset.accountName || '';
+
+    if (!accountNumber || !accountName) {
+        console.error('❌ Data rekening tidak lengkap di option dataset');
+        alert('Data rekening tidak lengkap. Silakan refresh dan login ulang.');
+        return;
+    }
+
+    btn.disabled = true;
+    const originalText = btn.innerText;
+    btn.innerText = 'MEMPROSES...';
+
+    try {
+        const userId = currentSession.user.id;
+
+        // 3. VERIFIKASI SALDO REAL-TIME DARI DATABASE
+        const { data: profile, error: profileErr } = await supabaseClient
+            .from('profiles')
+            .select('balance')
+            .eq('id', userId)
+            .single();
+
+        if (profileErr || !profile) throw new Error('Gagal mengambil data saldo.');
+
+        const currentBalance = parseFloat(profile.balance) || 0;
+        console.log('💰 Saldo user:', currentBalance, '| Withdraw:', amount);
+
+        // Cek apakah saldo cukup
+        if (currentBalance < amount) {
+            withdrawErrorMsg.textContent = `Saldo tidak cukup! Saldo Anda: IDR ${currentBalance.toLocaleString('id-ID')}`;
+            withdrawErrorMsg.style.display = 'block';
+            withdrawAmountInput.style.borderColor = '#ff3333';
+            btn.innerText = originalText;
+            btn.disabled = false;
+            return;
+        }
+
+        // 4. PROSES POTONG SALDO DI DATABASE
+        const { error: updateErr } = await supabaseClient
+            .from('profiles')
+            .update({ balance: currentBalance - amount })
+            .eq('id', userId);
+
+        if (updateErr) throw new Error('Gagal memproses pemotongan saldo.');
+
+        // 5. CATAT KE TABEL TRANSAKSI
+        try {
+            await supabaseClient.from('transactions').insert({
+                user_id: userId,
+                type: 'WITHDRAW',
+                amount: amount,
+                bank_name: bankName,
+                account_number: accountNumber,
+                account_name: accountName,
+                status: 'PENDING',
+                created_at: new Date().toISOString()
+            });
+        } catch (txErr) {
+            console.warn('⚠️ Gagal catat transaksi (tidak fatal):', txErr);
+        }
+
+        // 6. SUKSES
+        alert(`✅ Permintaan penarikan Rp ${amount.toLocaleString('id-ID')} berhasil!\n\nTujuan: ${bankName} - ${accountNumber}\nAtas nama: ${accountName}\n\nStatus: Menunggu verifikasi admin.`);
+
+        // Reset Form
+        withdrawAmountInput.value = '';
+        withdrawBankSelect.value = '';
+        withdrawBankSelect.style.borderColor = '#555';
+
+        // Update tampilan saldo di form
+        const withdrawBalanceEl = document.getElementById('withdrawBalance');
+        if (withdrawBalanceEl) {
+            const newBal = currentBalance - amount;
+            withdrawBalanceEl.innerText = 'IDR ' + newBal.toLocaleString('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Update saldo di header atas
+        if (typeof checkAuthState === 'function') checkAuthState(currentSession);
+
+    } catch (err) {
+        console.error('❌ Error withdraw:', err);
+        withdrawErrorMsg.textContent = 'Terjadi kesalahan: ' + err.message;
+        withdrawErrorMsg.style.display = 'block';
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 });
 
-// Reset border merah saat bank dipilih
+// Reset border merah & update nama rekening saat bank dipilih
 document.body.addEventListener('change', function (e) {
     if (e.target.id !== 'withdrawBankSelect') return;
     e.target.style.borderColor = '#555';
+    
     const errMsg = document.getElementById('withdrawErrorMsg');
     if (errMsg) errMsg.style.display = 'none';
+
+    const opt = e.target.options[e.target.selectedIndex];
+    const nameEl = document.getElementById('withdrawAccountName');
+    if (nameEl && opt && opt.dataset.accountName) {
+        nameEl.value = opt.dataset.accountName;
+    }
 });
 
 
 // ============================================================
-// BAGIAN 2: SEMUA LOGIKA UI LAINNYA
+// BAGIAN 2: LOGIKA UI LAINNYA
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-
-    // Guard: generateCaptcha mungkin belum tersedia kalau auth.js error
+    
+    // Guard: pastikan fungsi auth tersedia
     if (typeof generateCaptcha === 'function') {
         generateCaptcha();
-    } else {
-        console.warn('⚠️ generateCaptcha tidak tersedia — cek auth.js');
     }
-
-    // Guard: supabaseClient wajib ada
     if (typeof supabaseClient === 'undefined') {
         console.error('❌ supabaseClient tidak terdefinisi! Cek config.js');
         return;
     }
 
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
-        checkAuthState(session);
-        handleRouting();
+        if (typeof checkAuthState === 'function') checkAuthState(session);
+        if (typeof handleRouting === 'function') handleRouting();
     });
 
     supabaseClient.auth.onAuthStateChange((_event, session) => {
-        checkAuthState(session);
+        if (typeof checkAuthState === 'function') checkAuthState(session);
     });
 
     // --- Ikon Profil di Header ---
@@ -126,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // FUNGSI ROUTING & LOADING
     // ==========================================
-
     const routes = {
         '/home': 'homeView',
         '/': 'homeView',
@@ -161,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!currentSession && targetViewId !== 'homeView') {
                 hideLoading();
-                openLoginPanel();
+                if (typeof openLoginPanel === 'function') openLoginPanel();
                 return;
             }
 
@@ -182,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateNavActiveState(viewId) {
         document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
-
         if (viewId === 'homeView') document.getElementById('navHome')?.classList.add('active');
         if (viewId === 'promoView') document.getElementById('navPromo')?.classList.add('active');
         if (viewId === 'memoView') document.getElementById('navMemo')?.classList.add('active');
@@ -292,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currEl) currEl.value = '';
                 if (newEl) newEl.value = '';
                 if (confEl) confEl.value = '';
-                switchProfileTab('detail');
+                if (typeof switchProfileTab === 'function') switchProfileTab('detail');
             }
             btnChangePassword.innerText = "Simpan Perubahan";
         });
@@ -332,11 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const targetId = this.getAttribute('data-target');
             const targetPane = targetId ? document.getElementById(targetId) : null;
-            if (targetPane) {
-                targetPane.classList.add('active');
-            } else {
-                console.warn('⚠️ Tab deposit menunjuk ke elemen yang tidak ada:', targetId);
-            }
+            if (targetPane) targetPane.classList.add('active');
         });
     });
 
@@ -364,7 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentIndex = 0;
         const totalSlides = 3;
         let autoSlideInterval;
-
         function goToSlide(index) {
             currentIndex = index;
             track.style.transform = `translateX(${currentIndex * -33.3333}%)`;
@@ -373,9 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         function startAutoSlide() {
             clearInterval(autoSlideInterval);
-            autoSlideInterval = setInterval(() => {
-                goToSlide((currentIndex + 1) % totalSlides);
-            }, 5000);
+            autoSlideInterval = setInterval(() => { goToSlide((currentIndex + 1) % totalSlides); }, 5000);
         }
         startAutoSlide();
     }
@@ -403,10 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let amountK;
             const rand = Math.random();
             if (rand < 0.8) amountK = Math.floor(Math.random() * 451) + 50;
-            else {
-                if (Math.random() > 0.5) amountK = Math.floor(Math.random() * 40) + 10;
-                else amountK = Math.floor(Math.random() * 9500) + 501;
-            }
+            else { if (Math.random() > 0.5) amountK = Math.floor(Math.random() * 40) + 10; else amountK = Math.floor(Math.random() * 9500) + 501; }
             const type = Math.random() > 0.5 ? 'DEPOSIT' : 'WITHDRAW';
             const now = new Date();
             now.setMinutes(now.getMinutes() - Math.floor(Math.random() * 60));
@@ -433,10 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearInterval(transInterval);
             transInterval = setInterval(() => {
                 transIndex++;
-                if (transIndex >= totalPages) {
-                    transIndex = 0;
-                    populateCards();
-                }
+                if (transIndex >= totalPages) { transIndex = 0; populateCards(); }
                 goToTransSlide(transIndex);
             }, 4000);
         }
@@ -464,7 +539,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     ic.classList.remove('fa-minus');
                     ic.classList.add('fa-plus');
                 });
-
                 answer.style.maxHeight = answer.scrollHeight + "px";
                 icon.classList.remove('fa-plus');
                 icon.classList.add('fa-minus');
@@ -473,9 +547,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // HALAMAN DEPOSIT & QRIS
+    // HALAMAN DEPOSIT & QRIS (UPDATE DATABASE)
     // ==========================================
-    window.openDepositView = function () {
+    window.openDepositView = async function () {
         if (!currentSession) { openLoginPanel(); return; }
 
         document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
@@ -491,28 +565,65 @@ document.addEventListener('DOMContentLoaded', () => {
         if (formInputArea) formInputArea.style.display = 'block';
         if (qrisArea) qrisArea.style.display = 'none';
 
-        if (currentSession && currentSession.user) {
-            const metadata = currentSession.user.user_metadata;
+        if (!currentSession || !currentSession.user) return;
 
-            let usernameTeks = metadata.username || currentSession.user.email.split('@')[0] || "-";
+        const userId = currentSession.user.id;
+
+        try {
+            // 1. AMBIL DATA DARI DATABASE
+            const { data: profile, error: profileErr } = await supabaseClient
+                .from('profiles')
+                .select('username, email, account_name, bank_name, account_number, balance')
+                .eq('id', userId)
+                .single();
+
+            if (profileErr || !profile) {
+                console.error('❌ Gagal ambil profil:', profileErr);
+                return;
+            }
+
+            // 2. SET USERNAME DEPOSIT
             const depositUsernameEl = document.getElementById('depositUsername');
-            if (depositUsernameEl) depositUsernameEl.value = usernameTeks;
+            if (depositUsernameEl) depositUsernameEl.value = profile.username || '-';
 
-            let accName = metadata.account_name || "-";
+            // 3. SET NAMA REKENING
             const withdrawAccountNameEl = document.getElementById('withdrawAccountName');
-            if (withdrawAccountNameEl) withdrawAccountNameEl.value = accName;
+            if (withdrawAccountNameEl) withdrawAccountNameEl.value = profile.account_name || '-';
 
+            // 4. SET DROPDOWN BANK
             const bankSelect = document.getElementById('withdrawBankSelect');
             if (bankSelect) {
                 bankSelect.innerHTML = '<option value="">- Silahkan pilih -</option>';
-                if (metadata.bank_name && metadata.account_number) {
-                    let opt = document.createElement('option');
-                    opt.value = metadata.bank_name;
-                    let maskedAcc = metadata.account_number.length > 4 ? '****' + metadata.account_number.slice(-4) : metadata.account_number;
-                    opt.text = `${metadata.bank_name} (${maskedAcc})`;
+                if (profile.bank_name && profile.account_number) {
+                    const opt = document.createElement('option');
+                    opt.value = profile.bank_name;
+                    let maskedAcc = profile.account_number.length > 4 ? '****' + profile.account_number.slice(-4) : profile.account_number;
+                    opt.text = `${profile.bank_name} (${maskedAcc}) - ${profile.account_name}`;
+                    opt.dataset.bankName = profile.bank_name;
+                    opt.dataset.accountNumber = profile.account_number;
+                    opt.dataset.accountName = profile.account_name;
+                    bankSelect.appendChild(opt);
+                } else {
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.text = '⚠️ Belum ada rekening terdaftar';
+                    opt.disabled = true;
                     bankSelect.appendChild(opt);
                 }
             }
+
+            // 5. TAMPILKAN SALDO
+            const withdrawBalanceEl = document.getElementById('withdrawBalance');
+            if (withdrawBalanceEl) {
+                const saldo = parseFloat(profile.balance) || 0;
+                withdrawBalanceEl.innerText = 'IDR ' + saldo.toLocaleString('id-ID', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+        } catch (err) {
+            console.error('❌ Error openDepositView:', err);
         }
     };
 
