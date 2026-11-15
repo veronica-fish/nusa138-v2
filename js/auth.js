@@ -133,4 +133,4 @@ function checkAuthState(session) {
         if(infoBar) infoBar.style.display = 'none'; 
         closeProfilePanel();
     }
-          }
+}
