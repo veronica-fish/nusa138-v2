@@ -2,7 +2,6 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <!-- Tambahan ID viewportMeta untuk fitur Desktop View -->
     <meta id="viewportMeta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nusa138 Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,13 +16,20 @@
     <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- CSS KHUSUS FORM PENGADUAN -->
     <style>
+        /* CSS KHUSUS FORM PENGADUAN */
         .pd-form-group { margin-bottom: 15px; }
         .pd-form-group label { display: block; color: #fff; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
         .pd-input { width: 100%; padding: 12px; background: transparent; border: 1px solid #fff; color: #fff; border-radius: 4px; outline: none; font-size: 14px; }
         .pd-input:focus { border-color: #a855f7; }
         .pd-input option { background: #000; }
+
+        /* CSS UNTUK MENYEMBUNYIKAN GELEMBUNG TALKSILO BAWAAN */
+        iframe[src*="talksilo"], 
+        #talksilo-widget-container, 
+        .talksilo-launcher { 
+            display: none !important; 
+        }
     </style>
 </head>
 <body>
@@ -510,7 +516,7 @@
             </div>
         </div>
 
-        <!-- PANEL LOGIN (Diperbaiki & Hanya Username) -->
+        <!-- PANEL LOGIN -->
         <div id="loginPanel" class="login-panel-overlay">
             <div class="login-panel-content">
                 <div class="login-header">
@@ -549,9 +555,7 @@
             </div>
         </div>
 
-        <!-- =========================================
-             PANEL PROFIL SAYA (LENGKAP & DIPERBAIKI)
-             ========================================= -->
+        <!-- PANEL PROFIL SAYA -->
         <div id="profilePanel" class="profile-panel-overlay">
             <div class="profile-panel-content">
                 <div class="profile-header">
@@ -612,7 +616,9 @@
             <a href="#/promo" data-link class="nav-item" id="navPromo"><i class="fas fa-gift nav-icon"></i><span>PROMO SAYA</span></a>
             <a href="#/deposit" data-link class="nav-item dana-nav-item" id="danaBtn"><div class="dana-icon-wrapper"><i class="fas fa-wallet nav-icon"></i></div><span>DANA</span></a>
             <a href="#/memo" data-link class="nav-item" id="navMemo"><i class="far fa-envelope nav-icon"></i><span>MEMO</span></a>
-            <a href="#" class="nav-item" id="navLiveChat"><i class="far fa-comment-dots nav-icon"></i><span>LIVE CHAT</span></a>
+            
+            <!-- Tombol Live Chat diubah ke javascript:void(0) -->
+            <a href="javascript:void(0)" class="nav-item" id="navLiveChat"><i class="far fa-comment-dots nav-icon"></i><span>LIVE CHAT</span></a>
         </nav>
 
     </div>
@@ -622,5 +628,8 @@
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
     <script src="js/sidebar.js"></script> 
+
+    <!-- TALK SILO WIDGET -->
+    <script async src="https://talksilo.com/widget.js" data-key="fe256042-49ab-421f-947f-f9ac890b0405"></script>
 </body>
 </html>
