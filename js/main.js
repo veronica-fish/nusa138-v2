@@ -4,14 +4,18 @@
 window.navigateTo = function (path, pushState = true) {
     if (typeof showLoading === 'function') showLoading();
     
+    // Menggunakan Hash (#) untuk mencegah error 404 dan merusak CSS
     if (pushState) {
-        if (window.location.hash !== '#' + path) window.location.hash = path;
+        if (window.location.hash !== '#' + path) {
+            window.location.hash = path;
+        }
     }
     
     document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
     const parts = path.split('/').filter(p => p !== '');
     const mainRoute = parts[0] || 'home';
 
+    // Logika Halaman
     if (mainRoute === 'home' || mainRoute === '') {
         document.getElementById('homeView')?.classList.add('active');
         document.getElementById('navHome')?.classList.add('active');
@@ -88,6 +92,7 @@ window.loadLobby = async function() {
             }
         }
 
+        // Sortir Provider Terpopuler
         uniqueProviders.sort((a, b) => {
             const aPop = POPULAR_PROVIDERS.includes(a.provider.toLowerCase());
             const bPop = POPULAR_PROVIDERS.includes(b.provider.toLowerCase());
@@ -101,24 +106,44 @@ window.loadLobby = async function() {
     }
 };
 
+// DESAIN PROVIDER BARU (LEBIH PREMIUM)
 window.renderProviders = function(providersList) {
     const providerGrid = document.getElementById('providerGrid');
     providerGrid.innerHTML = ''; 
+    
     if (providersList.length === 0) {
-        providerGrid.innerHTML = `<p style="color: gray; grid-column: span 3; text-align: center;">Provider tidak ditemukan.</p>`;
+        providerGrid.innerHTML = `<p style="color: gray; grid-column: span 3; text-align: center; margin-top: 20px;">Provider tidak ditemukan.</p>`;
         return;
     }
 
     providersList.forEach(prov => {
         const card = document.createElement('div');
-        card.style.cssText = "background: linear-gradient(145deg, #2a2a2a, #1a1a1a); box-shadow: 0 4px 8px rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 12px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px; aspect-ratio: 1/1; transition: all 0.3s ease;";
-        card.onmouseover = () => { card.style.transform = "translateY(-5px)"; card.style.borderColor = "#a855f7"; };
-        card.onmouseout = () => { card.style.transform = "translateY(0)"; card.style.borderColor = "#444"; };
         
+        // Background gradient gelap, border tipis, dan sudut melengkung
+        card.style.cssText = "background: linear-gradient(180deg, #1f1f1f 0%, #0d0d0d 100%); box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 0 0 1px #333; border-radius: 12px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 8px; aspect-ratio: 1/1; transition: all 0.3s ease;";
+        
+        // Efek Hover: Kotak naik sedikit dan memancarkan cahaya ungu
+        card.onmouseover = () => { 
+            card.style.transform = "translateY(-5px)"; 
+            card.style.boxShadow = "0 8px 20px rgba(123, 44, 191, 0.6), inset 0 0 0 1px #a855f7"; 
+            card.style.background = "linear-gradient(180deg, #2a2a2a 0%, #111 100%)";
+        };
+        
+        // Efek saat kursor meninggalkan kotak
+        card.onmouseout = () => { 
+            card.style.transform = "translateY(0)"; 
+            card.style.boxShadow = "0 4px 15px rgba(0,0,0,0.6), inset 0 0 0 1px #333"; 
+            card.style.background = "linear-gradient(180deg, #1f1f1f 0%, #0d0d0d 100%)";
+        };
+        
+        // Logo & Teks
         card.innerHTML = `
-            <img src="${prov.logo || 'https://via.placeholder.com/150/222/FFF?text='+prov.name}" style="width: 90%; height: 60%; object-fit: contain; margin-bottom: 10px;">
-            <span style="color: #fff; font-size: 12px; text-align: center; font-weight: 600; text-shadow: 1px 1px 2px #000;">${prov.name}</span>
+            <div style="width: 90%; height: 60%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                <img src="${prov.logo || 'https://via.placeholder.com/150/111/FFF?text='+prov.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <span style="color: #e0e0e0; font-size: 12px; text-align: center; font-weight: 700; letter-spacing: 0.5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">${prov.name}</span>
         `;
+        
         card.onclick = () => window.navigateTo(`/${window.currentCategory}/${prov.provider}`, true);
         providerGrid.appendChild(card);
     });
@@ -135,6 +160,7 @@ window.loadProviderGamesByURL = async function(category, providerCode) {
     
     let filteredGames = window.allGamesData.filter(game => game.provider === providerCode && game.game_type === category);
     
+    // Sortir Game Terpopuler
     filteredGames.sort((a, b) => {
         const aPop = POPULAR_GAMES.some(kw => a.name.toLowerCase().includes(kw));
         const bPop = POPULAR_GAMES.some(kw => b.name.toLowerCase().includes(kw));
@@ -191,6 +217,7 @@ window.renderGames = function() {
 
     window.currentGameIndex = endIndex;
 
+    // Tombol Load More
     let btnLoadMore = document.getElementById('btnLoadMoreGames');
     if (window.currentGameIndex < window.currentGamesData.length) {
         if (!btnLoadMore) {
@@ -206,6 +233,7 @@ window.renderGames = function() {
 
 window.backToProviders = function() { window.navigateTo(`/${window.currentCategory}`, true); };
 
+// Pencarian Game/Provider
 document.getElementById('searchLobbyInput')?.addEventListener('input', function(e) {
     const keyword = e.target.value.toLowerCase();
     if (document.getElementById('providerSection').style.display === 'block') {
@@ -347,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(() => { currentIndex = (currentIndex + 1) % 3; track.style.transform = `translateX(${currentIndex * -33.3333}%)`; }, 5000);
     }
 
-    // Live Transaksi Palsu (Dikembalikan)
+    // Animasi Live Transaksi
     const transTrack = document.getElementById('transTrack');
     const transDots = document.querySelectorAll('.t-dot');
     if (transTrack) {
@@ -396,6 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         populateCards(); startTransSlider();
     }
 
+    // Login Action
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
@@ -410,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Buka Halaman Deposit (Form)
     window.openDepositView = async function () {
         if (!currentSession) { window.navigateTo('/login', true); return; }
         document.getElementById('formInputArea').style.display = 'block';
@@ -434,6 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Buat QRIS
     const btnShowQris = document.getElementById('btnShowQris');
     if (btnShowQris) {
         btnShowQris.addEventListener('click', async () => {
@@ -457,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Kembali dari QRIS
     if (document.getElementById('btnBackToForm')) {
         document.getElementById('btnBackToForm').addEventListener('click', () => {
             document.getElementById('qrisArea').style.display = 'none';
@@ -464,6 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Tabs Deposit (Deposit / Withdraw / History)
     document.querySelectorAll('.deposit-tab').forEach(tab => {
         tab.addEventListener('click', function () {
             document.querySelectorAll('.deposit-tab').forEach(t => t.classList.remove('active'));
@@ -473,6 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // FAQ Accordion
     document.querySelectorAll('.faq-question').forEach(question => {
         question.addEventListener('click', function () {
             const answer = this.nextElementSibling;
