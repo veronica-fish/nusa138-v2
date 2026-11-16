@@ -1,4 +1,68 @@
 // ============================================================
+// BAGIAN 0: FUNGSI INTEGRASI GAME SOFTAGGREGATOR
+// ============================================================
+window.bukaGame = async function(gameCode) {
+    if (typeof currentSession === 'undefined' || !currentSession || !currentSession.user) {
+        alert("Silakan login terlebih dahulu untuk bermain!");
+        if (typeof openLoginPanel === 'function') openLoginPanel();
+        return;
+    }
+
+    // Ambil username dari metadata Supabase
+    const username = currentSession.user.user_metadata.username;
+    
+    // GANTI URL INI dengan URL Wispbyte Anda
+    const BACKEND_URL = 'https://nusa138.wispbyte.app'; 
+
+    if (typeof showLoading === 'function') showLoading();
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/get-game`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: username,
+                gameCode: gameCode 
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            alert("Gagal membuka game: " + data.error);
+        } else {
+            // Set URL game ke dalam iframe
+            const iframe = document.getElementById('gameIframe');
+            if (iframe) iframe.src = data.url;
+            
+            // Pindah ke halaman gameView
+            if (typeof navigateTo === 'function') {
+                navigateTo('/game', false);
+            }
+        }
+    } catch (err) {
+        console.error("Error koneksi ke server:", err);
+        alert("Koneksi ke server game gagal. Pastikan server Wispbyte menyala.");
+    } finally {
+        if (typeof hideLoading === 'function') hideLoading();
+    }
+};
+
+// Fungsi untuk menutup game dan kembali ke Home
+window.closeGame = function() {
+    const iframe = document.getElementById('gameIframe');
+    if (iframe) iframe.src = ''; // Kosongkan iframe agar game berhenti
+    
+    if (typeof navigateTo === 'function') {
+        navigateTo('/home', true);
+    }
+    
+    // Refresh saldo
+    if (typeof openDepositView === 'function') openDepositView();
+};
+
+
+// ============================================================
 // BAGIAN 1: WITHDRAW & FORMAT ANGKA (ANTI-HACK RPC)
 // Diletakkan paling atas agar selalu berfungsi
 // ============================================================
@@ -162,7 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '/memo': 'memoView',
         '/deposit': 'depositView',
         '/about': 'aboutView',
-        '/banking': 'bankingView'
+        '/banking': 'bankingView',
+        '/game': 'gameView' // <--- RUTE GAME DITAMBAHKAN
     };
 
     window.showLoading = function () {
@@ -197,9 +262,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetView) {
                 targetView.classList.add('active');
                 window.scrollTo(0, 0);
+                
+                // Sembunyikan bottom nav jika masuk ke game
+                const bottomNav = document.querySelector('.bottom-nav');
+                if (targetViewId === 'gameView') {
+                    if (bottomNav) bottomNav.style.display = 'none';
+                } else {
+                    if (bottomNav) bottomNav.style.display = 'flex';
+                }
             }
 
-            // ⚠️ KUNCI PERBAIKAN: Jika masuk halaman Deposit, langsung tarik data dari DB
             if (targetViewId === 'depositView') {
                 if (typeof openDepositView === 'function') {
                     openDepositView(); 
