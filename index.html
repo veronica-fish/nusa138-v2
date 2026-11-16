@@ -6,7 +6,7 @@
     <title>Nusa138 Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS FILES (Absolute Paths untuk Cloudflare) -->
+    <!-- CSS FILES -->
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/home.css">
     <link rel="stylesheet" href="/css/pages.css">
@@ -65,13 +65,11 @@
                 </div>
             </div>
 
-            <!-- TOMBOL LOGIN (Menggunakan Routing URL) -->
             <div class="auth-tabs-container" id="authTabs">
                 <button class="auth-tab-btn login-tab" onclick="navigateTo('/login', true)">LOGIN</button>
                 <button class="auth-tab-btn daftar-tab" onclick="openRegisterView()">DAFTAR</button>
             </div>
 
-            <!-- KATEGORI GAME (Menggunakan Routing URL) -->
             <section class="category-grid">
                 <div class="category-item" onclick="navigateTo('/slots', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-dice"></i></div><span>SLOTS</span></div>
                 <div class="category-item" onclick="navigateTo('/live', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-tv"></i></div><span>LIVE GAMES</span></div>
@@ -176,9 +174,9 @@
                     <div class="browser-icons"><i class="fab fa-chrome"></i><i class="fab fa-firefox-browser"></i><i class="fas fa-shield-halved"></i></div>
                 </div>
                 <div class="footer-links">
-                    <a href="/about" data-link>Tentang kami</a> <span>|</span> 
-                    <a href="/banking" data-link>Info Perbankan</a> <span>|</span> 
-                    <a href="/about" data-link>Pusat Info</a> <span>|</span> 
+                    <a href="#/about" data-link>Tentang kami</a> <span>|</span> 
+                    <a href="#/banking" data-link>Info Perbankan</a> <span>|</span> 
+                    <a href="#/about" data-link>Pusat Info</a> <span>|</span> 
                     <a href="#">Hubungi kami</a>
                 </div>
                 <div class="footer-divider"></div>
@@ -202,19 +200,15 @@
                 <input type="text" id="searchLobbyInput" placeholder="Cari Provider atau Game..." style="width: 100%; padding: 12px 40px 12px 15px; border-radius: 8px; border: 1px solid #444; background: #1a1a1a; color: white; outline: none; font-size: 14px;">
                 <i class="fas fa-search" style="position: absolute; right: 15px; top: 14px; color: #888;"></i>
             </div>
-
             <div id="providerSection">
                 <div style="border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                     <h2 id="providerSectionTitle" style="color: white; font-size: 18px; margin: 0;">Pilih Provider</h2>
                 </div>
                 <div id="providerGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
             </div>
-
             <div id="gameSection" style="display: none;">
                 <div style="display: flex; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <button onclick="backToProviders()" style="background: #333; color: white; border: none; padding: 8px 12px; border-radius: 5px; margin-right: 15px; cursor: pointer;">
-                        <i class="fas fa-arrow-left"></i> Kembali
-                    </button>
+                    <button onclick="backToProviders()" style="background: #333; color: white; border: none; padding: 8px 12px; border-radius: 5px; margin-right: 15px; cursor: pointer;"><i class="fas fa-arrow-left"></i> Kembali</button>
                     <h2 id="currentProviderName" style="color: white; font-size: 18px; margin: 0;">Daftar Game</h2>
                 </div>
                 <div id="gameGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
@@ -697,23 +691,23 @@
         </div>
 
         <!-- =========================================
-             NAVIGASI BAWAH
+             NAVIGASI BAWAH (Hash Routing)
              ========================================= -->
         <nav class="bottom-nav">
-            <a href="/home" data-link class="nav-item" id="navHome"><i class="fas fa-home nav-icon"></i><span>HOME</span></a>
-            <a href="/promo" data-link class="nav-item" id="navPromo"><i class="fas fa-gift nav-icon"></i><span>PROMO SAYA</span></a>
+            <a href="#/home" data-link class="nav-item" id="navHome"><i class="fas fa-home nav-icon"></i><span>HOME</span></a>
+            <a href="#/promo" data-link class="nav-item" id="navPromo"><i class="fas fa-gift nav-icon"></i><span>PROMO SAYA</span></a>
             
-            <a href="/deposit" data-link class="nav-item dana-nav-item" id="danaBtn">
+            <a href="#/deposit" data-link class="nav-item dana-nav-item" id="danaBtn">
                 <div class="dana-icon-wrapper"><i class="fas fa-wallet nav-icon"></i></div><span>DANA</span>
             </a>
 
-            <a href="/memo" data-link class="nav-item" id="navMemo"><i class="far fa-envelope nav-icon"></i><span>MEMO</span></a>
+            <a href="#/memo" data-link class="nav-item" id="navMemo"><i class="far fa-envelope nav-icon"></i><span>MEMO</span></a>
             <a href="#" class="nav-item" id="navLiveChat"><i class="far fa-comment-dots nav-icon"></i><span>LIVE CHAT</span></a>
         </nav>
 
     </div>
     
-    <!-- JS FILES (Absolute Paths untuk Cloudflare) -->
+    <!-- JS FILES -->
     <script src="/js/config.js"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/main.js"></script>
