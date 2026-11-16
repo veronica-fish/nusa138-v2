@@ -6,11 +6,11 @@
     <title>Nusa138 Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS FILES -->
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="css/pages.css">
-    <link rel="stylesheet" href="css/auth.css">
+    <!-- CSS FILES (Absolute Paths untuk Cloudflare) -->
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <link rel="stylesheet" href="/css/auth.css">
     
     <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -198,23 +198,18 @@
              HALAMAN LOBI GAME
              ========================================= -->
         <div id="lobbyView" class="page-view" style="padding: 15px; padding-bottom: 80px; background: #0a0a0a;">
-            <!-- KOLOM PENCARIAN -->
             <div style="margin-bottom: 15px; position: relative;">
                 <input type="text" id="searchLobbyInput" placeholder="Cari Provider atau Game..." style="width: 100%; padding: 12px 40px 12px 15px; border-radius: 8px; border: 1px solid #444; background: #1a1a1a; color: white; outline: none; font-size: 14px;">
                 <i class="fas fa-search" style="position: absolute; right: 15px; top: 14px; color: #888;"></i>
             </div>
 
-            <!-- TAMPILAN 1: DAFTAR PROVIDER -->
             <div id="providerSection">
                 <div style="border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                     <h2 id="providerSectionTitle" style="color: white; font-size: 18px; margin: 0;">Pilih Provider</h2>
                 </div>
-                <div id="providerGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                    <p style="color: gray; grid-column: span 3; text-align: center;">Memuat provider...</p>
-                </div>
+                <div id="providerGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
             </div>
 
-            <!-- TAMPILAN 2: DAFTAR GAME -->
             <div id="gameSection" style="display: none;">
                 <div style="display: flex; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                     <button onclick="backToProviders()" style="background: #333; color: white; border: none; padding: 8px 12px; border-radius: 5px; margin-right: 15px; cursor: pointer;">
@@ -718,9 +713,9 @@
 
     </div>
     
-    <!-- JS FILES -->
-    <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/main.js"></script>
+    <!-- JS FILES (Absolute Paths untuk Cloudflare) -->
+    <script src="/js/config.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
 </body>
 </html>
