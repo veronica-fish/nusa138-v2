@@ -6,31 +6,21 @@
     <title>Nusa138 Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS FILES -->
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/pages.css">
     <link rel="stylesheet" href="css/auth.css">
     
-    <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- OVERLAY LOADING -->
-    <div id="loadingOverlay">
-        <div class="spinner"></div>
-    </div>
+    <div id="loadingOverlay"><div class="spinner"></div></div>
 
     <div class="app-container">
-        
-        <!-- Header Global -->
+        <!-- Header -->
         <header class="app-header">
-            <div class="header-left">
-                <button class="icon-btn"><i class="fas fa-bars"></i></button>
-            </div>
-            <div class="header-logo">
-                <img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/logo.gif" alt="Logo" class="logo-img">
-            </div>
+            <div class="header-left"><button class="icon-btn"><i class="fas fa-bars"></i></button></div>
+            <div class="header-logo"><img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/logo.gif" alt="Logo" class="logo-img"></div>
             <div class="header-right">
                 <button class="icon-btn" id="headerUserBtn"><i class="far fa-user"></i></button>
                 <button class="icon-btn"><i class="fas fa-search"></i></button>
@@ -43,15 +33,13 @@
             <button class="refresh-btn"><i class="fas fa-sync-alt"></i></button>
         </div>
 
-        <!-- =========================================
-             HALAMAN HOME
-             ========================================= -->
+        <!-- HALAMAN HOME -->
         <main id="homeView" class="page-view active">
             <section class="banner-slider">
                 <div class="banner-track" id="bannerTrack">
-                    <div class="banner-slide"><img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/b1.png" alt="Banner 1" draggable="false"></div>
-                    <div class="banner-slide"><img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/b2.png" alt="Banner 2" draggable="false"></div>
-                    <div class="banner-slide"><img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/b3.png" alt="Banner 3" draggable="false"></div>
+                    <div class="banner-slide"><img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/b1.png" alt="Banner 1"></div>
+                    <div class="banner-slide"><img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/b2.png" alt="Banner 2"></div>
+                    <div class="banner-slide"><img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/b3.png" alt="Banner 3"></div>
                 </div>
                 <div class="banner-dots" id="bannerDots">
                     <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
@@ -60,9 +48,7 @@
 
             <div class="marquee-bar">
                 <div class="marquee-icon"><i class="fas fa-bullhorn"></i></div>
-                <div class="marquee-text-wrapper">
-                    <div class="marquee-text">Laporkan pelayanan CS yang kurang memuaskan atau kendala lainnya melalui Live Chat</div>
-                </div>
+                <div class="marquee-text-wrapper"><div class="marquee-text">Laporkan pelayanan CS yang kurang memuaskan atau kendala lainnya melalui Live Chat</div></div>
             </div>
 
             <div class="auth-tabs-container" id="authTabs">
@@ -70,7 +56,7 @@
                 <button class="auth-tab-btn daftar-tab" onclick="openRegisterView()">DAFTAR</button>
             </div>
 
-            <!-- KATEGORI GAME (Mengarah ke Lobi) -->
+            <!-- KATEGORI GAME -->
             <section class="category-grid">
                 <div class="category-item" onclick="navigateTo('/lobby', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-dice"></i></div><span>SLOTS</span></div>
                 <div class="category-item" onclick="navigateTo('/lobby', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-tv"></i></div><span>LIVE GAMES</span></div>
@@ -83,134 +69,38 @@
                 <div class="category-item" onclick="navigateTo('/lobby', true)"><div class="cat-icon"><i class="fas fa-gamepad"></i></div><span>E-GAMES</span></div>
             </section>
 
-            <section class="stat-card">
-                <div class="card-value">IDR 35.887.788.361.00</div>
-            </section>
-
-            <section class="server-selector-box">
-                <h3 class="server-title">Pilih Server Events</h3>
-                <div class="server-watermark">LINK GACOR!</div>
-                <div class="select-wrapper">
-                    <select>
-                        <option>Pilih Server</option>
-                        <option>Server 1</option>
-                        <option>Server 2</option>
-                    </select>
-                </div>
-                <div class="server-status">Status: Belum terhubung ke server</div>
-            </section>
-
-            <section class="live-transaction-section">
-                <div class="section-title"><span class="live-dot"></span> DEPOSIT & WITHDRAW TERAKHIR</div>
-                <div class="trans-slider-container">
-                    <div class="trans-track" id="transTrack">
-                        <div class="trans-card"><div class="avatar-wrapper"><i class="fas fa-user"></i></div><div class="trans-name" id="name1">---*****</div><div class="trans-amount" id="amount1">IDR 0.00</div><div class="trans-type" id="type1">DEPOSIT</div></div>
-                        <div class="trans-card"><div class="avatar-wrapper"><i class="fas fa-user"></i></div><div class="trans-name" id="name2">---*****</div><div class="trans-amount" id="amount2">IDR 0.00</div><div class="trans-type" id="type2">WITHDRAW</div></div>
-                        <div class="trans-card"><div class="avatar-wrapper"><i class="fas fa-user"></i></div><div class="trans-name" id="name3">---*****</div><div class="trans-amount" id="amount3">IDR 0.00</div><div class="trans-type" id="type3">DEPOSIT</div></div>
-                        <div class="trans-card"><div class="avatar-wrapper"><i class="fas fa-user"></i></div><div class="trans-name" id="name4">---*****</div><div class="trans-amount" id="amount4">IDR 0.00</div><div class="trans-type" id="type4">WITHDRAW</div></div>
-                    </div>
-                </div>
-                <div class="trans-dots" id="transDots">
-                    <span class="t-dot active"></span><span class="t-dot"></span><span class="t-dot"></span>
-                </div>
-            </section>
-
-            <section class="stats-box">
-                <div class="stat-item"><div class="stat-icon-circle"><i class="fas fa-user"></i></div><div class="stat-label">PENGGUNA</div><div class="stat-number">214466</div></div>
-                <div class="stat-item"><div class="stat-icon-circle"><i class="fas fa-money-bill-stack"></i></div><div class="stat-label">JUMLAH<br>TARUHAN</div><div class="stat-number">217,254</div></div>
-                <div class="stat-item"><div class="stat-icon-circle"><i class="fas fa-laptop"></i></div><div class="stat-label">ONLINE</div><div class="stat-number">64340</div></div>
-            </section>
-
-            <section class="info-menu-box" style="background: transparent; border: none;">
-                <div class="faq-item" style="margin-bottom: 10px;">
-                    <div class="faq-question"><span>Cara Melakukan Deposit</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer">
-                        <p><b>1. Cara melakukan setoran dana untuk akun NUSA138?</b><br>Setoran dana dapat ditransfer melalui kartu debit atau transfer bank.</p>
-                        <p><b>2. Mata uang apa yang dapat diterima oleh NUSA138?</b><br>NUSA138 untuk saat ini hanya menerima mata uang Rupiah.</p>
-                        <p><b>3. Berapa lama untuk memproses transaksi deposit?</b><br>Proses deposit biasanya memakan waktu 1-3 menit setelah dana diterima oleh sistem kami.</p>
-                        <p><i>Harap dicatat bahwa setiap transaksi deposit harus disesuaikan dengan kebijakan yang telah ditentukan.</i></p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>Cara Melakukan Withdraw</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer">
-                        <p><b>1. Bagaimana cara melakukan penarikan dana dari akun NUSA138?</b><br>Penarikan dana dapat ditransfer ke rekening/akun Anda melalui kartu debit atau transfer bank.</p>
-                        <p><b>2. Berapa lama untuk memproses transaksi penarikan?</b><br>Transaksi penarikan akan diproses dalam waktu 5 (lima) menit, namun pemrosesan mungkin memakan waktu lebih lama selama akhir pekan / offline bank.</p>
-                    </div>
-                </div>
-            </section>
-
             <footer class="app-footer">
-                <div class="footer-section">
-                    <h4 class="footer-title">Cara Pembayaran</h4>
-                    <div class="payment-methods">
-                        <img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/localbanktransfer.jpg" alt="Local Bank">
-                        <img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/ewallet.jpg" alt="E-Wallet">
-                        <img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/qris.webp" alt="QRIS" class="img-qris">
-                    </div>
-                </div>
-                <div class="footer-links">
-                    <a href="/about" data-link>Tentang kami</a> <span>|</span> 
-                    <a href="/banking" data-link>Info Perbankan</a> <span>|</span> 
-                    <a href="/about" data-link>Pusat Info</a>
-                </div>
-                <div class="footer-copyright">
-                    <p>@2026 NUSA138. Seluruh hak cipta | 18+ | v1.55</p>
-                </div>
+                <div class="footer-copyright" style="text-align: center; padding: 20px; color: #888;">@2026 NUSA138. Seluruh hak cipta | 18+</div>
             </footer>
         </main>
 
-        <!-- =========================================
-             HALAMAN LOBI GAME (TAMBAHAN BARU)
-             ========================================= -->
+        <!-- HALAMAN LOBI (PROVIDER & GAME) -->
         <div id="lobbyView" class="page-view" style="padding: 15px; padding-bottom: 80px; background: #0a0a0a;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-                <h2 style="color: white; font-size: 18px;">Pilih Game</h2>
-                <button onclick="navigateTo('/home', true)" style="background: #333; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px;">Kembali</button>
-            </div>
-            <div id="gameGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                <!-- Game akan dimuat oleh main.js -->
-                <p style="color: gray; text-align: center; grid-column: span 3;">Memuat game...</p>
-            </div>
-        </div>
-
-        <!-- =========================================
-             HALAMAN TENTANG KAMI (FAQ)
-             ========================================= -->
-        <div id="aboutView" class="page-view">
-            <div class="faq-circle-container">
-                <div class="faq-circle">
-                    <i class="fas fa-question-circle" style="font-size: 24px; margin-bottom: 5px;"></i>
-                    <span>FAQ</span>
+            
+            <!-- TAMPILAN 1: DAFTAR PROVIDER -->
+            <div id="providerSection">
+                <div style="border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                    <h2 style="color: white; font-size: 18px; margin: 0;">Pilih Provider</h2>
+                </div>
+                <div id="providerGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <p style="color: gray; grid-column: span 3; text-align: center;">Memuat provider...</p>
                 </div>
             </div>
-            <div class="general-bar">General</div>
-            <div class="faq-list">
-                <div class="faq-item">
-                    <div class="faq-question"><span>1. Tentang NUSA138</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer">
-                        <p>NUSA138 adalah merek hiburan online yang melayani pasar Asia Pasifik, terutama Indonesia, Malaysia dan Cina.</p>
-                    </div>
+
+            <!-- TAMPILAN 2: DAFTAR GAME -->
+            <div id="gameSection" style="display: none;">
+                <div style="display: flex; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                    <button onclick="backToProviders()" style="background: #333; color: white; border: none; padding: 8px 12px; border-radius: 5px; margin-right: 15px; cursor: pointer;">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </button>
+                    <h2 id="currentProviderName" style="color: white; font-size: 18px; margin: 0;">Daftar Game</h2>
                 </div>
+                <div id="gameGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
             </div>
+
         </div>
 
-        <!-- =========================================
-             HALAMAN INFO PERBANKAN
-             ========================================= -->
-        <div id="bankingView" class="page-view">
-            <div class="faq-circle-container">
-                <div class="faq-circle"><span>FAQ</span></div>
-            </div>
-            <div class="general-bar" style="text-align: center;">Banking</div>
-            <div class="banking-content" style="padding: 15px;">
-                <p style="color: white;">NUSA138 dikenal dengan transaksi yang efisien dan aman.</p>
-            </div>
-        </div>
-
-        <!-- =========================================
-             HALAMAN DEPOSIT & WITHDRAW
-             ========================================= -->
+        <!-- HALAMAN DEPOSIT & WITHDRAW -->
         <div id="depositView" class="page-view">
             <div class="deposit-tabs">
                 <div class="deposit-tab active" data-target="depositForm">Deposit</div>
@@ -223,7 +113,6 @@
                 <div class="deposit-card">
                     <h3 class="deposit-title">DEPOSIT QRIS</h3>
                     <p class="deposit-subtitle">(PROSES CEPAT, GAMPANG & AUTOMATIS)</p>
-
                     <div id="formInputArea">
                         <div class="deposit-input-group">
                             <label>Username</label>
@@ -238,14 +127,9 @@
                         </div>
                         <button type="button" class="btn-primary" id="btnShowQris">TAMPILKAN QRIS</button>
                     </div>
-
                     <div id="qrisArea" style="display: none;">
-                        <div class="qris-box">
-                            <img id="qrisImage" src="" alt="QRIS Code">
-                        </div>
-                        <div class="qris-details">
-                            <p><span>Nominal Deposit</span> <span id="qrisNominal">: Rp 0</span></p>
-                        </div>
+                        <div class="qris-box"><img id="qrisImage" src="" alt="QRIS Code"></div>
+                        <div class="qris-details"><p><span>Nominal Deposit</span> <span id="qrisNominal">: Rp 0</span></p></div>
                         <a id="btnDownloadQris" href="#" download="QRIS_Payment.png" class="btn-primary" style="display: block; margin-top: 15px; text-decoration: none; text-align: center;">Download QRIS</a>
                         <button type="button" class="btn-primary" id="btnBackToForm" style="background: #555; margin-top: 10px;">Kembali</button>
                     </div>
@@ -265,7 +149,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="withdraw-row" style="align-items: flex-start;">
                         <label style="margin-top: 12px;">Jumlah</label>
                         <div style="width: 65%;">
@@ -273,132 +156,24 @@
                             <div id="withdrawErrorMsg" style="color: #ff3333; font-size: 12px; margin-top: 5px; display: none;"></div>
                         </div>
                     </div>
-
                     <div class="withdraw-row">
                         <label>Akun<br>Sudah<br>terdaftar<span style="color:red">*</span></label>
-                        <select id="withdrawBankSelect" class="withdraw-input">
-                            <option value="">- Silahkan pilih -</option>
-                        </select>
+                        <select id="withdrawBankSelect" class="withdraw-input"><option value="">- Silahkan pilih -</option></select>
                     </div>
-
                     <div class="withdraw-row">
                         <label>Nama Sesuai<br>Rekening</label>
                         <input type="text" id="withdrawAccountName" class="withdraw-input" readonly>
                     </div>
-
                     <button type="button" class="btn-withdraw" id="btnWithdraw">Withdraw</button>
                 </div>
             </div>
-
-            <!-- TAB 5 TRANSAKSI TERAKHIR -->
+            
             <div id="transHistory" class="deposit-pane">
-                <div class="deposit-card" style="text-align: center; padding: 40px 20px;">
-                    <h3>5 Transaksi Terakhir</h3>
-                    <p style="color: #aaa; margin-top: 10px;">Belum ada riwayat transaksi.</p>
-                </div>
+                <div class="deposit-card" style="text-align: center; padding: 40px 20px;"><h3>5 Transaksi Terakhir</h3><p>Belum ada riwayat.</p></div>
             </div>
         </div>
 
-        <!-- =========================================
-             HALAMAN PROMO SAYA
-             ========================================= -->
-        <div id="promoView" class="page-view">
-            <div class="page-header"><h2>Promo saya</h2></div>
-            <div class="promo-tabs">
-                <div class="promo-tab active" data-target="tab-promo">Promo saya</div>
-                <div class="promo-tab" data-target="tab-bonus">Bonus saya</div>
-            </div>
-            <div class="promo-content">
-                <div id="tab-promo" class="tab-pane active">
-                    <div class="data-row"><span>Promosi:</span><span>-</span></div>
-                </div>
-                <div id="tab-bonus" class="tab-pane">
-                    <div class="data-row"><span>Bonus saya:</span><span>-</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- =========================================
-             HALAMAN MEMO
-             ========================================= -->
-        <div id="memoView" class="page-view">
-            <div class="memo-tabs">
-                <div class="memo-tab active" data-target="tab-inbox">KOTAK MASUK (0)</div>
-            </div>
-            <div class="memo-content">
-                <div id="tab-inbox" class="tab-pane active">
-                    <div class="memo-empty"><p>No records available</p></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- =========================================
-             HALAMAN DAFTAR
-             ========================================= -->
-        <div id="registerView" class="register-page" style="display: none;">
-            <div class="register-tabs">
-                <div class="reg-tab active" style="width: 100%; border-bottom: none;">Daftar Akun</div>
-            </div>
-            <div class="register-form-content">
-                <div class="section-title"><span>Rincian Akun</span></div>
-                <div class="reg-input-group">
-                    <label>Nama pengguna</label>
-                    <input type="text" id="regUsername">
-                </div>
-                <div class="reg-input-group">
-                    <label>Kata sandi</label>
-                    <input type="password" id="regPassword">
-                </div>
-                <div class="reg-input-group">
-                    <label>Konfirmasi Sandi</label>
-                    <input type="password" id="regConfirmPassword">
-                </div>
-                <div class="reg-input-group">
-                    <label>Alamat email</label>
-                    <input type="email" id="regEmail">
-                </div>
-                <div class="reg-input-group">
-                    <label>WA / Nomor telepon</label>
-                    <input type="tel" id="regPhone">
-                </div>
-                <div class="section-title"><span>Informasi bank</span></div>
-                <div class="reg-input-group">
-                    <label>Nama Sesuai Rekening</label>
-                    <input type="text" id="regAccountName">
-                </div>
-                <div class="reg-input-group">
-                    <label>Bank</label>
-                    <select id="regBankName" class="reg-select">
-                        <option value="">- Silahkan pilih -</option>
-                    </select>
-                </div>
-                <div class="reg-input-group">
-                    <label>No. Rekening Bank</label>
-                    <input type="number" id="regAccountNumber">
-                </div>
-                <div class="reg-input-group captcha-group">
-                    <label>Captcha</label>
-                    <div class="captcha-wrapper">
-                        <input type="text" id="regCaptchaInput">
-                        <div class="captcha-image-box"><span id="captchaText">0234</span></div>
-                        <i class="fas fa-sync-alt refresh-captcha" onclick="generateCaptcha()"></i>
-                    </div>
-                </div>
-                <div class="terms-box">
-                    <label class="custom-checkbox">
-                        <input type="checkbox" id="regTerms">
-                        <span class="checkmark"></span>
-                        <span class="terms-text">Saya menyetujui Syarat & Ketentuan.</span>
-                    </label>
-                </div>
-                <button type="button" class="reg-submit-btn" id="btnRegister">Submit</button>
-                <p class="reg-switch" style="text-align: center;">Sudah punya akun? <span onclick="closeRegisterView(); openLoginPanel();">Masuk Disini</span></p>
-            </div>
-        </div>
-
-        <!-- =========================================
-             PANEL LOGIN & PROFIL
-             ========================================= -->
+        <!-- PANEL LOGIN -->
         <div id="loginPanel" class="login-panel-overlay">
             <div class="login-panel-content">
                 <div class="login-header">
@@ -406,51 +181,24 @@
                     <h2>Login</h2>
                 </div>
                 <div class="login-body">
-                    <div class="login-input-group">
-                        <label>Nama pengguna / Email</label>
-                        <input type="text" id="loginEmail">
-                    </div>
-                    <div class="login-input-group">
-                        <label>Kata sandi</label>
-                        <input type="password" id="loginPassword">
-                    </div>
+                    <div class="login-input-group"><label>Nama pengguna / Email</label><input type="text" id="loginEmail"></div>
+                    <div class="login-input-group"><label>Kata sandi</label><input type="password" id="loginPassword"></div>
                     <button type="button" class="login-btn" id="btnLogin">Login</button>
                 </div>
             </div>
         </div>
 
-        <div id="profilePanel" class="profile-panel-overlay">
-            <div class="profile-panel-content">
-                <div class="profile-header">
-                    <button class="close-panel" onclick="closeProfilePanel()"><i class="fas fa-times"></i></button>
-                    <h2>Profil saya</h2>
-                    <button class="logout-panel" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i></button>
-                </div>
-                <div class="profile-wallet-card">
-                    <div class="wallet-amount"><span id="profileBalance">IDR 0.00</span></div>
-                </div>
-                <div class="profile-tab-content active">
-                    <div class="profile-row"><span class="profile-label">Nama pengguna :</span><span class="profile-value" id="profUsername">-</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- =========================================
-             NAVIGASI BAWAH
-             ========================================= -->
+        <!-- NAVIGASI BAWAH -->
         <nav class="bottom-nav">
             <a href="/home" data-link class="nav-item" id="navHome"><i class="fas fa-home nav-icon"></i><span>HOME</span></a>
             <a href="/promo" data-link class="nav-item" id="navPromo"><i class="fas fa-gift nav-icon"></i><span>PROMO SAYA</span></a>
-            <a href="/deposit" data-link class="nav-item dana-nav-item" id="danaBtn">
-                <div class="dana-icon-wrapper"><i class="fas fa-wallet nav-icon"></i></div><span>DANA</span>
-            </a>
+            <a href="/deposit" data-link class="nav-item dana-nav-item" id="danaBtn"><div class="dana-icon-wrapper"><i class="fas fa-wallet nav-icon"></i></div><span>DANA</span></a>
             <a href="/memo" data-link class="nav-item" id="navMemo"><i class="far fa-envelope nav-icon"></i><span>MEMO</span></a>
-            <a href="#" class="nav-item" id="navLiveChat"><i class="far fa-comment-dots nav-icon"></i><span>LIVE CHAT</span></a>
+            <a href="#" class="nav-item"><i class="far fa-comment-dots nav-icon"></i><span>LIVE CHAT</span></a>
         </nav>
 
     </div>
     
-    <!-- JS FILES -->
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
