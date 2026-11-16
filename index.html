@@ -11,10 +11,19 @@
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/pages.css">
     <link rel="stylesheet" href="css/auth.css">
-    <link rel="stylesheet" href="css/sidebar.css"> <!-- CSS Sidebar Baru -->
+    <link rel="stylesheet" href="css/sidebar.css"> 
     
     <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- CSS KHUSUS FORM PENGADUAN -->
+    <style>
+        .pd-form-group { margin-bottom: 15px; }
+        .pd-form-group label { display: block; color: #fff; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
+        .pd-input { width: 100%; padding: 12px; background: transparent; border: 1px solid #fff; color: #fff; border-radius: 4px; outline: none; font-size: 14px; }
+        .pd-input:focus { border-color: #a855f7; }
+        .pd-input option { background: #000; }
+    </style>
 </head>
 <body>
     <!-- OVERLAY LOADING -->
@@ -31,9 +40,9 @@
         <a href="#/deposit" class="sidebar-item"><i class="fas fa-money-bill-wave"></i> DANA</a>
         <a href="#/slots" class="sidebar-item"><i class="fas fa-gamepad"></i> PERMAINAN</a>
         <a href="#/about" class="sidebar-item"><i class="fas fa-info-circle"></i> INFO</a>
-        <a href="#" class="sidebar-item"><i class="fas fa-headset"></i> HUBUNGI KAMI</a>
+        <a href="#/contact" class="sidebar-item"><i class="fas fa-headset"></i> HUBUNGI KAMI</a>
         <a href="#" class="sidebar-item" onclick="toggleDesktopView()"><i class="fas fa-desktop"></i> DESKTOP VIEW</a>
-        <a href="#" class="sidebar-item"><i class="fas fa-exclamation-circle"></i> PENGADUAN MEMBER</a>
+        <a href="#/pengaduan" class="sidebar-item"><i class="fas fa-exclamation-circle"></i> PENGADUAN MEMBER</a>
     </div>
 
     <div class="app-container">
@@ -41,7 +50,6 @@
         <!-- Header Global -->
         <header class="app-header">
             <div class="header-left">
-                <!-- Tombol Garis 3 dengan ID -->
                 <button class="icon-btn" id="hamburgerBtn"><i class="fas fa-bars"></i></button>
             </div>
             <div class="header-logo">
@@ -136,7 +144,7 @@
                 <div class="stat-item"><div class="stat-icon-circle"><i class="fas fa-laptop"></i></div><div class="stat-label">ONLINE</div><div class="stat-number">64340</div></div>
             </section>
 
-            <!-- FOOTER LENGKAP (TETAP ADA) -->
+            <!-- FOOTER LENGKAP -->
             <footer class="app-footer">
                 <div class="footer-section">
                     <h4 class="footer-title">Cara Pembayaran</h4>
@@ -346,6 +354,71 @@
         </div>
 
         <!-- =========================================
+             HALAMAN PENGADUAN MEMBER (BARU)
+             ========================================= -->
+        <div id="pengaduanView" class="page-view" style="padding: 20px; background: #000; min-height: 100vh;">
+            <h2 style="text-align: center; color: #fff; font-weight: 300; margin-bottom: 20px;">Formulir Pengaduan</h2>
+            
+            <div class="pd-form-group">
+                <label>Username</label>
+                <input type="text" id="pdUsername" class="pd-input">
+            </div>
+            
+            <div class="pd-form-group">
+                <label>Email</label>
+                <input type="email" id="pdEmail" class="pd-input">
+            </div>
+            
+            <div class="pd-form-group">
+                <label>Kategori Keluhan</label>
+                <select id="pdKategori" class="pd-input">
+                    <option value="">- Pilih Kategori -</option>
+                    <option value="Kendala Transaksi">Kendala Transaksi</option>
+                    <option value="Kendala Permainan">Kendala Permainan</option>
+                    <option value="Kendala Akun">Kendala Akun</option>
+                </select>
+            </div>
+            
+            <div class="pd-form-group">
+                <label>Pesan</label>
+                <textarea id="pdPesan" class="pd-input" rows="5"></textarea>
+            </div>
+
+            <div style="color: #ccc; font-size: 13px; line-height: 1.6; margin-top: 15px; margin-bottom: 30px;">
+                <p style="color: #a855f7; font-weight: bold; margin-bottom: 5px;">LINK GACOR!</p>
+                <ul style="padding-left: 20px;">
+                    <li>Silakan menyampaikan segala bentuk keluhan yang Anda alami sebagai member dari website ini.</li>
+                    <li>Pesan Anda akan terkirim ke tim pusat engine yang khusus menangani pengaduan member tentang website ini.</li>
+                    <li>Respon akan dikirim ke alamat email yang Anda tulis di form.</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center;">
+                <button type="button" id="btnSubmitPengaduan" style="background: #3b82f6; color: white; border: none; padding: 12px 40px; font-size: 16px; border-radius: 5px; cursor: pointer;">Submit</button>
+            </div>
+        </div>
+
+        <!-- =========================================
+             HALAMAN HUBUNGI KAMI (BARU)
+             ========================================= -->
+        <div id="contactView" class="page-view" style="background: #000; min-height: 100vh; padding: 20px;">
+            <h1 style="font-size: 32px; font-weight: 300; color: #fff; margin-bottom: 15px;">Hubungi kami</h1>
+            <p style="font-size: 15px; color: #ddd; line-height: 1.5; margin-bottom: 20px;">Spesialis Dukungan Pelanggan tersedia setiap hari selama 24 jam.</p>
+            
+            <div style="background: #9d4edd; padding: 15px; border-radius: 4px; display: flex; flex-direction: column; gap: 10px;">
+                <a href="https://api.whatsapp.com/send?phone=6287895216624" target="_blank" style="display: flex; align-items: center; background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; text-decoration: none; color: #fff; font-size: 16px; font-weight: 500; transition: background 0.2s;">
+                    <i class="fab fa-whatsapp" style="font-size: 28px; margin-right: 15px;"></i>
+                    6287895216624
+                </a>
+                
+                <a href="https://t.me/nusa138" target="_blank" style="display: flex; align-items: center; background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; text-decoration: none; color: #fff; font-size: 16px; font-weight: 500; transition: background 0.2s;">
+                    <i class="fab fa-telegram-plane" style="font-size: 28px; margin-right: 15px;"></i>
+                    Nusa138 Official
+                </a>
+            </div>
+        </div>
+
+        <!-- =========================================
              HALAMAN DAFTAR & PANEL
              ========================================= -->
         <div id="registerView" class="register-page" style="display: none;">
@@ -396,6 +469,16 @@
             </div>
         </div>
 
+        <!-- POP-UP SUKSES PENGADUAN -->
+        <div id="modalPengaduan" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+            <div style="background: #fff; padding: 30px; border-radius: 12px; text-align: center; width: 85%; max-width: 350px;">
+                <i class="fas fa-check-circle" style="color: #4ade80; font-size: 60px; margin-bottom: 15px;"></i>
+                <h3 style="color: #333; margin-bottom: 10px; font-size: 20px;">Berhasil</h3>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Berhasil mengirim umpan balik Anda ke tim kami.</p>
+                <button onclick="document.getElementById('modalPengaduan').style.display='none'" style="background: #3b82f6; color: white; border: none; padding: 10px 30px; font-size: 16px; border-radius: 5px; cursor: pointer;">OK</button>
+            </div>
+        </div>
+
         <!-- NAVIGASI BAWAH -->
         <nav class="bottom-nav">
             <a href="#/home" data-link class="nav-item" id="navHome"><i class="fas fa-home nav-icon"></i><span>HOME</span></a>
@@ -411,6 +494,6 @@
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/sidebar.js"></script> <!-- JS Sidebar Baru -->
+    <script src="js/sidebar.js"></script> 
 </body>
 </html>
