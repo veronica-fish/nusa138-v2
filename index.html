@@ -6,11 +6,12 @@
     <title>Nusa138 Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS FILES (Path Relatif, tanpa garis miring di depan) -->
+    <!-- CSS FILES -->
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/pages.css">
     <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/sidebar.css"> <!-- CSS Sidebar Baru -->
     
     <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -21,19 +22,34 @@
         <div class="spinner"></div>
     </div>
 
+    <!-- =========================================
+         SIDEBAR MENU (Muncul dari Kiri)
+         ========================================= -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div id="sidebarMenu" class="sidebar-menu">
+        <a href="#/home" class="sidebar-item"><i class="fas fa-home"></i> HOME</a>
+        <a href="#/deposit" class="sidebar-item"><i class="fas fa-money-bill-wave"></i> DANA</a>
+        <a href="#/slots" class="sidebar-item"><i class="fas fa-gamepad"></i> PERMAINAN</a>
+        <a href="#/about" class="sidebar-item"><i class="fas fa-info-circle"></i> INFO</a>
+        <a href="#" class="sidebar-item"><i class="fas fa-headset"></i> HUBUNGI KAMI</a>
+        <a href="#" class="sidebar-item" onclick="toggleDesktopView()"><i class="fas fa-desktop"></i> DESKTOP VIEW</a>
+        <a href="#" class="sidebar-item"><i class="fas fa-exclamation-circle"></i> PENGADUAN MEMBER</a>
+    </div>
+
     <div class="app-container">
         
         <!-- Header Global -->
         <header class="app-header">
             <div class="header-left">
-                <button class="icon-btn"><i class="fas fa-bars"></i></button>
+                <!-- Tombol Garis 3 dengan ID -->
+                <button class="icon-btn" id="hamburgerBtn"><i class="fas fa-bars"></i></button>
             </div>
             <div class="header-logo">
                 <img src="https://cdn.jsdelivr.net/gh/veronica-fish/nusa138-v2@main/img/logo.gif" alt="Logo" class="logo-img">
             </div>
             <div class="header-right">
                 <button class="icon-btn" id="headerUserBtn"><i class="far fa-user"></i></button>
-                <button class="icon-btn"><i class="fas fa-search"></i></button>
+                <button class="icon-btn" id="headerSearchBtn"><i class="fas fa-search"></i></button>
             </div>
         </header>
 
@@ -120,46 +136,7 @@
                 <div class="stat-item"><div class="stat-icon-circle"><i class="fas fa-laptop"></i></div><div class="stat-label">ONLINE</div><div class="stat-number">64340</div></div>
             </section>
 
-            <section class="info-menu-box" style="background: transparent; border: none;">
-                <div class="faq-item" style="margin-bottom: 10px;">
-                    <div class="faq-question"><span>Cara Melakukan Deposit</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer">
-                        <p><b>1. Cara melakukan setoran dana untuk akun NUSA138?</b><br>Setoran dana dapat ditransfer melalui kartu debit atau transfer bank.</p>
-                        <p><b>2. Mata uang apa yang dapat diterima oleh NUSA138?</b><br>NUSA138 untuk saat ini hanya menerima mata uang Rupiah.</p>
-                        <p><b>3. Dapatkah saya menggunakan lebih dari satu rekening bank untuk transaksi setoran?</b><br>Tidak ada ketentuan tentang jumlah rekening bank yang digunakan untuk transaksi setoran, namun nama lengkap pengirim dana/depositor rekening bank harus sama dengan nama rekening yang tercantum di NUSA138. Harap dicatat bahwa NUSA138 memiliki hak untuk menolak segala jenis transaksi yang dilakukan oleh nama pihak ketiga.</p>
-                        <p><b>4. Apakah slip transfer / pembayaran harus dikirim ke NUSA138 setelah saya mentransfer dana melalui bank?</b><br>Ini tidak wajib, tetapi dalam situasi tertentu, slip pembayaran Anda diperlukan untuk menyederhanakan proses transaksi Anda.</p>
-                        <p><b>5. Berapa lama untuk memproses transaksi deposit?</b><br>Proses deposit biasanya memakan waktu 1-3 menit setelah dana diterima oleh sistem kami.</p>
-                        <p><b>6. Di mana saya bisa mendapatkan informasi nomor akun NUSA138 dan berapa jumlah setoran minimum?</b><br>Silakan hubungi layanan pelanggan kami (online 24 jam) untuk mendapatkan informasi mengenai nomor akun dan jumlah minimum untuk transaksi deposit.</p>
-                        <p><b>7. Cara Deposit (Petunjuk Deposit)</b><br>
-                        1. Hubungi Layanan Pelanggan kami (online 24 jam) untuk mendapatkan informasi tentang nomor akun setoran NUSA138.<br>
-                        2. Silakan masuk ke situs web NUSA138 dan pilih "Transaksi > Deposit" pada Tab menu.<br>
-                        3. Formulir setoran harus diisi dengan menggunakan data yang valid dan benar.<br>
-                        4. Isi jumlah setoran tanpa simbol titik / koma. Misalnya: 1000 (seribu rupiah).<br>
-                        5. Masukkan tanggal dan waktu yang benar (pagi / malam).<br>
-                        6. Pilih promosi yang dipilih, jika ada.<br>
-                        7. Pilih "Kirim" dan harap tunggu sementara.<br>
-                        8. Deposit Anda sedang diproses.</p>
-                        <p><i>Harap dicatat bahwa setiap transaksi deposit (masuk / keluar dari promosi) harus disesuaikan dengan kebijakan yang telah ditentukan. NUSA138 memiliki hak untuk menolak segala jenis transaksi jika tidak mematuhi kebijakan. Untuk informasi lebih lanjut silakan hubungi perwakilan layanan pelanggan kami (online 24 jam).</i></p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>Cara Melakukan Withdraw</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer">
-                        <p><b>1. Bagaimana cara melakukan penarikan dana dari akun NUSA138?</b><br>Penarikan dana dapat ditransfer ke rekening/akun Anda melalui kartu debit atau transfer bank.</p>
-                        <p><b>2. Adakah persyaratan untuk rekening bank yang saya gunakan untuk transaksi Withdrawal?</b><br>Penting untuk dicatat bahwa nama penerima pembayaran yang dimasukkan untuk penarikan harus sama dengan nama akun yang tercantum di NUSA138. Harap perhatikan bahwa NUSA138 memiliki hak untuk menolak segala jenis transaksi yang dilakukan oleh nama pihak ketiga dan permintaan penarikan yang tidak memenuhi kebijakan yang disebutkan akan segera ditolak.</p>
-                        <p><b>3. Mata uang apa yang dapat diterima oleh NUSA138?</b><br>NUSA138 untuk saat ini hanya menerima mata uang Rupiah.</p>
-                        <p><b>4. Berapa lama untuk memproses transaksi penarikan?</b><br>Transaksi penarikan akan diproses dalam waktu 5 (lima) menit, namun pemrosesan mungkin memakan waktu lebih lama selama akhir pekan / offline bank / hari libur bank atau jika verifikasi akun diperlukan untuk beberapa kasus.</p>
-                        <p><b>5. Bagaimana cara withdraw?</b><br>
-                        1. Silakan masuk ke situs web NUSA138 dan pilih "Transaksi > Penarikan" pada Tab menu.<br>
-                        2. Isi jumlah penarikan tanpa simbol titik / koma. Misalnya: 1000 (seribu Rupiah).<br>
-                        3. Pilih jenis bank penarikan dan pilih opsi bank.<br>
-                        4. Formulir penarikan harus diisi menggunakan data yang benar / benar (nama lengkap, nomor rekening bank, nama bank, dll).<br>
-                        5. Pilih "Kirim" dan harap tunggu sementara penarikan Anda sedang diproses.</p>
-                        <p><i>Harap dicatat bahwa setiap transaksi penarikan (masuk / keluar dari promosi) harus disesuaikan dengan kebijakan yang telah ditentukan. NUSA138 memiliki hak untuk menolak segala jenis transaksi jika tidak mematuhi kebijakan. Untuk informasi lebih lanjut silakan hubungi perwakilan layanan pelanggan kami (online 24 jam).</i></p>
-                    </div>
-                </div>
-            </section>
-
+            <!-- FOOTER LENGKAP (TETAP ADA) -->
             <footer class="app-footer">
                 <div class="footer-section">
                     <h4 class="footer-title">Cara Pembayaran</h4>
@@ -226,49 +203,7 @@
             <div class="faq-list">
                 <div class="faq-item">
                     <div class="faq-question"><span>1. Tentang NUSA138</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer">
-                        <p>NUSA138 adalah merek hiburan online yang melayani pasar Asia Pasifik, terutama Indonesia, Malaysia dan Cina. Produk yang ditawarkan terutama pada berbagai permainan online seperti taruhan sepakbola online, kasino online, slot, keno dan lotere, biner, poker, dan permainan lainnya.</p>
-                        <p>NUSA138 salah satu kasino terkemuka di Asia.</p>
-                        <p>Visi NUSA138 adalah untuk menyediakan hiburan berkualitas tinggi dan game bernilai tinggi bagi para pelanggannya. NUSA138 berkomitmen untuk menyediakan produk-produk permainan yang memimpin industri yang selalu didukung oleh promosi apa pun. Kelompok staf profesional disediakan untuk memastikan bahwa dengan bermain di NUSA138, Anda akan selalu mendapatkan pengalaman terbaik di sini.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>2. Kenapa NUSA138?</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer">
-                        <p>Seiring dengan promosi yang terus-menerus NUSA138 menawarkan peluang terbaik dalam setidaknya 1.000 jenis game sportsbook online terkemuka di pasar seperti liga sepak bola mulai dari Inggris, Spanyol, Eropa, Jerman serta olahraga lain seperti NBA, NFL, NCAA, Tenis, F1, dan taruhan olahraga lainnya. Selain taruhan olahraga, NUSA138 juga menyediakan berbagai permainan langsung, didukung oleh dealer online kasino, melalui Lobi Live Kasino, Anda akan dibawa ke Live Baccarat, Live Sic Bo, Live Dragon Tiger, Live Roulette, Live Kasino, Slot dan game menarik lainnya.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>3. Afiliasi?</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer"><p>Mohon maaf, saat ini Afiliasi sedang ditutup.</p></div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>4. Cara Bergabung?</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer">
-                        <p>Bergabunglah sebagai ANGGOTA atau AGEN</p>
-                        <p><b>a. MEMBER :</b><br>1. Login ke situs web NUSA138, pilih menu "GABUNG"<br>2. Isi formulir pendaftaran yang disediakan. Semua informasi dibutuhkan oleh data yang valid / benar, lalu pilih "SUBMIT"<br>3. Email konfirmasi akan dikirim ke email yang terdaftar dan dimaksudkan untuk mengkonfirmasi nama pengguna dan kata sandi yang terdaftar.<br>4. Kembali ke situs NUSA138, pilih "LOGIN"<br>5. Anda dapat melanjutkan ke langkah selanjutnya yang akan dimulai dari Deposit.</p>
-                        <p><b>b. AGEN :</b><br>1. Masuk ke situs web NUSA138, pilih menu "AFILIASI"<br>2. Isi formulir pendaftaran yang disediakan. Semua informasi yang dibutuhkan oleh data yang benar / benar, kemudian pilih "KIRIM"<br>3. Email konfirmasi akan dikirim ke email terdaftar dan dimaksudkan untuk mengkonfirmasi dan mengaktifkan nama pengguna dan kata sandi yang terdaftar.<br>4. Formulir yang dikirimkan akan melalui proses seleksi oleh NUSA138.<br>5. Pemohon yang berhasil akan dihubungi oleh NUSA138 melalui email, terkait dengan yang telah ditentukan sebelumnya syarat dan ketentuan Afiliasi NUSA138.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>5. Mata uang apa yang digunakan di NUSA138?</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer"><p>NUSA138 untuk saat ini hanya menerima mata uang Rupiah.</p></div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>6. Persyaratan usia ?</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer"><p>Untuk bergabung, Anda harus menyetujui Persyaratan & Ketentuan dan berusia minimal 18 tahun atau lebih. Sebagian besar negara memiliki aturannya sendiri tentang permainan online dan karenanya Anda harus memastikan bahwa Anda mengetahui adanya peraturan dan mematuhi aturan mereka.</p></div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>7. Bagaimana cara melakukan deposit di akun NUSA138 ?</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer"><p>Dana dapat disetorkan ke Akun NUSA138 Anda melalui sejumlah metode.</p></div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>8. Bagaimana saya bisa yakin bahwa permainan itu adil ?</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer"><p>Kami memiliki profesional untuk menghitung persentase pembayaran untuk semua game kami, memastikan bahwa Anda dapat yakin bahwa game kami memenuhi peraturan keadilan standar industri.</p></div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><span>9. Apakah informasi pribadi saya aman ?</span><i class="fas fa-plus"></i></div>
-                    <div class="faq-answer"><p>Kami akan memastikan bahwa detail Anda aman setiap saat. Kami menggunakan langkah-langkah keamanan kualitas terbaik Secure Socket (enkripsi 128 128 enkripsi Standar) (Standar enkripsi 128 128 SSL) dan disimpan di lingkungan operasi yang aman yang memungkinkan pelanggan melakukan pembayaran online tidak pernah lebih aman. NUSA138 tidak akan mengungkapkan informasi pribadi Anda kepada pihak ketiga mana pun.</p></div>
+                    <div class="faq-answer"><p>NUSA138 adalah merek hiburan online yang melayani pasar Asia Pasifik, terutama Indonesia, Malaysia dan Cina.</p></div>
                 </div>
             </div>
         </div>
@@ -280,43 +215,8 @@
             <div class="faq-circle-container">
                 <div class="faq-circle"><i class="fas fa-question-circle" style="font-size: 24px; margin-bottom: 5px;"></i><span>FAQ</span></div>
             </div>
-            <div class="general-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
-                <span style="flex: 1; text-align: center; padding-left: 20px;">Banking</span>
-                <i class="fas fa-bars" style="font-size: 20px; color: #fff;"></i>
-            </div>
-            <div class="sub-nav-text">GeneralDepositsWithdrawalGamingTechnicalBanking</div>
-            <div class="banking-content">
-                <p>NUSA138 dikenal dengan transaksi yang efisien dan aman. Kelompok staf profesional disediakan untuk memastikan bahwa semua transaksi akan berjalan lancar dan aman.</p><br>
-                <p><b>BANK LISTS</b></p>
-                <p>Berikut adalah daftar detail perbankan yang disediakan NUSA138 Indonesia :</p><br>
-                <div style="overflow-x: auto;">
-                    <table class="bank-table">
-                        <thead>
-                            <tr>
-                                <th rowspan="2">nama bank</th>
-                                <th rowspan="2">Status</th>
-                                <th rowspan="2">transaksi</th>
-                                <th rowspan="2">Metode Perbankan</th>
-                                <th colspan="2">limit transaksi</th>
-                                <th rowspan="2">waktu proses</th>
-                            </tr>
-                            <tr><th>Min</th><th>Max</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td rowspan="2" class="bank-name">BCA</td><td rowspan="2">Active</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
-                            <tr><td>Withdrawal</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                            <tr><td rowspan="2" class="bank-name">BRI</td><td rowspan="2">Active</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
-                            <tr><td>Withdrawal</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                            <tr><td rowspan="2" class="bank-name">BNI</td><td rowspan="2">Active</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
-                            <tr><td>Withdrawal</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                            <tr><td rowspan="2" class="bank-name">MANDIRI</td><td rowspan="2">Active</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
-                            <tr><td>Withdrawal</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                            <tr><td rowspan="2" class="bank-name">QRISSUPER</td><td rowspan="2">Inactive</td><td>Deposit</td><td>Deposit</td><td>10,000</td><td>250,000,000</td><td>1 Min</td></tr>
-                            <tr><td>Withdrawal</td><td>Withdrawal</td><td>25,000</td><td>40,000,000</td><td>5 Min</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <div class="general-bar" style="text-align: center;">Banking</div>
+            <div class="banking-content" style="padding: 15px;"><p style="color: white;">NUSA138 dikenal dengan transaksi yang efisien dan aman.</p></div>
         </div>
 
         <!-- =========================================
@@ -335,22 +235,12 @@
                     <p class="deposit-subtitle">(PROSES CEPAT, GAMPANG & AUTOMATIS)</p>
                     <div id="formInputArea">
                         <div class="deposit-input-group"><label>Username</label><input type="text" id="depositUsername" readonly></div>
-                        <div class="deposit-input-group">
-                            <label>Pilih Bonus</label>
-                            <select id="depositBonus"><option value="">--- TANPA BONUS ---</option></select>
-                        </div>
-                        <div class="deposit-input-group">
-                            <label>Nominal Deposit</label>
-                            <div class="input-prefix-wrapper"><span class="prefix">Rp</span><input type="number" id="depositAmount" placeholder="0" min="20000"></div>
-                        </div>
+                        <div class="deposit-input-group"><label>Nominal Deposit</label><div class="input-prefix-wrapper"><span class="prefix">Rp</span><input type="number" id="depositAmount" placeholder="0" min="20000"></div></div>
                         <button type="button" class="btn-primary" id="btnShowQris">TAMPILKAN QRIS</button>
                     </div>
                     <div id="qrisArea" style="display: none;">
                         <div class="qris-box"><img id="qrisImage" src="" alt="QRIS Code"></div>
-                        <div class="qris-details">
-                            <p><span>Nominal Deposit</span> <span id="qrisNominal">: Rp 0</span></p>
-                            <p><span>Status</span> <span id="qrisStatus" style="color: #f5c451;">: Menunggu Pembayaran</span></p>
-                        </div>
+                        <div class="qris-details"><p><span>Nominal Deposit</span> <span id="qrisNominal">: Rp 0</span></p></div>
                         <a id="btnDownloadQris" href="#" download="QRIS_Payment.png" class="btn-primary" style="display: block; margin-top: 15px; text-decoration: none; text-align: center;">Download QRIS</a>
                         <button type="button" class="btn-primary" id="btnBackToForm" style="background: #555; margin-top: 10px;">Kembali</button>
                     </div>
@@ -373,10 +263,6 @@
                     <div class="withdraw-row"><label>Akun<br>Sudah<br>terdaftar<span style="color:red">*</span></label><select id="withdrawBankSelect" class="withdraw-input"><option value="">- Silahkan pilih -</option></select></div>
                     <div class="withdraw-row"><label>Nama Sesuai<br>Rekening</label><input type="text" id="withdrawAccountName" class="withdraw-input" readonly></div>
                     <button type="button" class="btn-withdraw" id="btnWithdraw">Withdraw</button>
-                    <div class="withdraw-notice">
-                        <h4>PEMBERITAHUAN PENTING</h4>
-                        <p>Pastikan nama dan nomor rekening yang Anda masukkan sudah benar. Proses penarikan dana akan diproses dalam waktu 1x24 jam.</p>
-                    </div>
                 </div>
             </div>
             
@@ -460,144 +346,41 @@
         </div>
 
         <!-- =========================================
-             HALAMAN DAFTAR
+             HALAMAN DAFTAR & PANEL
              ========================================= -->
         <div id="registerView" class="register-page" style="display: none;">
-            <div class="register-tabs">
-                <div class="reg-tab active" style="width: 100%; border-bottom: none;">Daftar Akun</div>
-            </div>
+            <div class="register-tabs"><div class="reg-tab active" style="width: 100%; border-bottom: none;">Daftar Akun</div></div>
             <div class="register-form-content">
                 <div class="section-title"><span>Rincian Akun</span></div>
-                <div class="reg-input-group">
-                    <label>Nama pengguna</label>
-                    <input type="text" id="regUsername">
-                    <small>* Nama akun harus 6-12 karakter, hanya menggunakan huruf dan/atau angka (0-9) dan tidak ada simbol (@#$~%&)<br>cth: <b>namaakun1</b></small>
-                </div>
-                <div class="reg-input-group">
-                    <label>Kata sandi</label>
-                    <input type="password" id="regPassword">
-                    <small>* Minimal 8 karakter dan memiliki min 1 alfabet, 1 angka dan 1 karakter khusus (!@#$%^&*().-+)<br>cth: <b>password1@</b></small>
-                </div>
-                <div class="reg-input-group">
-                    <label>Konfirmasi Sandi</label>
-                    <input type="password" id="regConfirmPassword">
-                </div>
-                <div class="section-title"><span>Contact info</span></div>
-                <div class="reg-input-group">
-                    <label>Alamat email</label>
-                    <input type="email" id="regEmail">
-                    <small>* Silakan isi alamat email yang benar * cth : contoh@gmail.com , contoh@yahoo.com, contoh@outlook.com, etc</small>
-                </div>
-                <div class="reg-input-group">
-                    <label>WA / Nomor telepon</label>
-                    <div class="phone-input">
-                        <select class="country-code"><option>+62</option></select>
-                        <input type="tel" id="regPhone" placeholder="812345678">
-                    </div>
-                    <small>* Silakan isi nomor telepon tanpa angka 0 * cth: 812345678</small>
-                </div>
-                <div class="reg-input-group ref-group">
-                    <label>Kode Referensi /<br>Afiliasi</label>
-                    <div class="ref-input-wrapper">
-                        <input type="text" id="regReferral">
-                        <small>(Optional) Kosongkan jika tidak ada</small>
-                    </div>
-                </div>
-                <div class="section-title"><span>Informasi bank</span></div>
-                <div class="reg-input-group">
-                    <label>Nama Sesuai Rekening</label>
-                    <input type="text" id="regAccountName">
-                    <small>* Nama yang terdaftar harus sesuai dengan nama rekening bank yang digunakan untuk menyetor dan menarik dana.</small>
-                </div>
-                <div class="reg-input-group">
-                    <label>Jenis Akun Transaksi <span style="color:red">*</span></label>
-                    <div class="transaction-toggle">
-                        <button type="button" class="toggle-btn active" id="btnTypeBank" onclick="switchAccountType('bank')">Bank <i class="fas fa-check-circle" id="iconBank"></i></button>
-                        <button type="button" class="toggle-btn" id="btnTypeEwallet" onclick="switchAccountType('ewallet')">E-wallet <i class="fas fa-check-circle" id="iconEwallet" style="display:none;"></i></button>
-                    </div>
-                </div>
-                <div class="reg-input-group">
-                    <label id="labelBankName">Bank</label>
-                    <select id="regBankName" class="reg-select">
-                        <option value="">- Silahkan pilih -</option>
-                    </select>
-                </div>
-                <div class="reg-input-group">
-                    <label id="labelAccountNo">No. Rekening Bank</label>
-                    <input type="number" id="regAccountNumber">
-                    <small id="hintAccountNo">* Pastikan rekening anda Valid, Aktif, dan belum terdaftar di situs ini</small>
-                </div>
+                <div class="reg-input-group"><label>Nama pengguna</label><input type="text" id="regUsername"></div>
+                <div class="reg-input-group"><label>Kata sandi</label><input type="password" id="regPassword"></div>
+                <div class="reg-input-group"><label>Konfirmasi Sandi</label><input type="password" id="regConfirmPassword"></div>
+                <div class="reg-input-group"><label>Alamat email</label><input type="email" id="regEmail"></div>
+                <div class="reg-input-group"><label>WA / Nomor telepon</label><input type="tel" id="regPhone"></div>
+                <div class="reg-input-group"><label>Nama Sesuai Rekening</label><input type="text" id="regAccountName"></div>
+                <div class="reg-input-group"><label>Bank</label><select id="regBankName" class="reg-select"><option value="">- Silahkan pilih -</option></select></div>
+                <div class="reg-input-group"><label>No. Rekening Bank</label><input type="number" id="regAccountNumber"></div>
                 <div class="reg-input-group captcha-group">
                     <label>Captcha</label>
-                    <div class="captcha-wrapper">
-                        <input type="text" id="regCaptchaInput">
-                        <div class="captcha-image-box"><span id="captchaText">0234</span></div>
-                        <i class="fas fa-sync-alt refresh-captcha" onclick="generateCaptcha()"></i>
-                    </div>
+                    <div class="captcha-wrapper"><input type="text" id="regCaptchaInput"><div class="captcha-image-box"><span id="captchaText">0234</span></div><i class="fas fa-sync-alt refresh-captcha" onclick="generateCaptcha()"></i></div>
                 </div>
-                <div class="terms-box">
-                    <label class="custom-checkbox">
-                        <input type="checkbox" id="regTerms">
-                        <span class="checkmark"></span>
-                        <span class="terms-text">Dengan memilih tombol DAFTAR, saya menyatakan bahwa saya berusia 18 tahun atau lebih. Saya telah membaca dan menyetujui Syarat & Ketentuan. <a href="#">Lihat Syarat & Ketentuan</a></span>
-                    </label>
-                    <label class="custom-checkbox" style="margin-top: 15px;">
-                        <input type="checkbox">
-                        <span class="checkmark"></span>
-                        <span class="terms-text" style="color: #333;">Ingat saya</span>
-                    </label>
-                </div>
-                <div class="reg-submit-wrapper">
-                    <button type="button" class="reg-submit-btn" id="btnRegister">Submit</button>
-                </div>
-                <p class="reg-switch" style="text-align: center; margin-top: 20px;">Sudah punya akun? <span onclick="closeRegisterView(); navigateTo('/login', true);">Masuk Disini</span></p>
+                <div class="terms-box"><label class="custom-checkbox"><input type="checkbox" id="regTerms"><span class="checkmark"></span><span class="terms-text">Saya menyetujui Syarat & Ketentuan.</span></label></div>
+                <button type="button" class="reg-submit-btn" id="btnRegister">Submit</button>
+                <p class="reg-switch" style="text-align: center;">Sudah punya akun? <span onclick="closeRegisterView(); navigateTo('/login', true);">Masuk Disini</span></p>
             </div>
         </div>
 
-        <!-- =========================================
-             PANEL LOGIN
-             ========================================= -->
         <div id="loginPanel" class="login-panel-overlay">
             <div class="login-panel-content">
-                <div class="login-header">
-                    <button class="close-panel" onclick="navigateTo('/home', true)"><i class="fas fa-times"></i></button>
-                    <h2>Login</h2>
-                </div>
+                <div class="login-header"><button class="close-panel" onclick="navigateTo('/home', true)"><i class="fas fa-times"></i></button><h2>Login</h2></div>
                 <div class="login-body">
-                    <div class="login-input-group">
-                        <label>Nama pengguna / Email</label>
-                        <div class="login-input-wrapper">
-                            <i class="fas fa-user"></i>
-                            <input type="text" id="loginEmail" placeholder="">
-                        </div>
-                    </div>
-                    <div class="login-input-group">
-                        <label>Kata sandi</label>
-                        <div class="login-input-wrapper">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="loginPassword">
-                            <i class="fas fa-eye toggle-password" onclick="togglePasswordVisibility('loginPassword', this)"></i>
-                        </div>
-                    </div>
-                    <div class="login-remember">
-                        <label class="custom-checkbox white-check">
-                            <input type="checkbox">
-                            <span class="checkmark"></span>
-                            <span style="color:#fff; font-size:14px; margin-left: 5px;">Ingat saya</span>
-                        </label>
-                    </div>
+                    <div class="login-input-group"><label>Nama pengguna / Email</label><input type="text" id="loginEmail"></div>
+                    <div class="login-input-group"><label>Kata sandi</label><input type="password" id="loginPassword"></div>
                     <button type="button" class="login-btn" id="btnLogin">Login</button>
-                    <div class="login-divider"></div>
-                    <div class="login-register-box">
-                        Tidak terdaftar? <span onclick="closeLoginPanel(); openRegisterView();">Daftar</span>
-                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- =========================================
-             PANEL PROFIL SAYA
-             ========================================= -->
         <div id="profilePanel" class="profile-panel-overlay">
             <div class="profile-panel-content">
                 <div class="profile-header">
@@ -605,50 +388,19 @@
                     <h2>Profil saya</h2>
                     <button class="logout-panel" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
-                <div class="profile-wallet-card">
-                    <div class="wallet-amount"><span id="profileBalance">IDR 0.00</span> <i class="fas fa-sync-alt" style="font-size: 14px; margin-left: 5px;"></i></div>
-                    <div class="wallet-label">Dompet Permainan</div>
-                </div>
-                <div class="profile-tabs">
-                    <div class="profile-tab active" id="tabBtnDetail" onclick="switchProfileTab('detail')">Detail</div>
-                    <div class="profile-tab" id="tabBtnPassword" onclick="switchProfileTab('password')">Tukar kata sandi</div>
-                </div>
-                <div id="profileTabDetail" class="profile-tab-content active">
+                <div class="profile-wallet-card"><div class="wallet-amount"><span id="profileBalance">IDR 0.00</span></div></div>
+                <div class="profile-tab-content active">
                     <div class="profile-row"><span class="profile-label">Nama pengguna :</span><span class="profile-value" id="profUsername">-</span></div>
-                    <div class="profile-row"><span class="profile-label">Tingkat Anggota :</span><span class="profile-value">Regular 💎</span></div>
-                    <div class="profile-row"><span class="profile-label">Nama Sesuai Rekening :</span><span class="profile-value" id="profAccountName">-</span></div>
                     <div class="profile-row"><span class="profile-label">Alamat email :</span><span class="profile-value" id="profEmail">-</span></div>
-                    <div class="profile-row"><span class="profile-label">Nomor Kontak :</span><span class="profile-value" id="profPhone">-</span></div>
-                </div>
-                <div id="profileTabPassword" class="profile-tab-content">
-                    <div class="reg-input-group" style="margin-top: 15px;">
-                        <label style="color:#fff;">Kata Sandi Saat ini</label>
-                        <input type="password" id="currentPassword" style="background: rgba(255,255,255,0.1); border: 1px solid #fff;">
-                    </div>
-                    <div class="reg-input-group">
-                        <label style="color:#fff;">Kata Sandi Baru</label>
-                        <input type="password" id="newPassword" style="background: rgba(255,255,255,0.1); border: 1px solid #fff;">
-                    </div>
-                    <div class="reg-input-group">
-                        <label style="color:#fff;">Konfirmasi Sandi Baru</label>
-                        <input type="password" id="confirmNewPassword" style="background: rgba(255,255,255,0.1); border: 1px solid #fff;">
-                    </div>
-                    <button type="button" class="login-btn" id="btnChangePassword" style="margin-top: 10px; background: #7b2cbf;">Simpan Perubahan</button>
                 </div>
             </div>
         </div>
 
-        <!-- =========================================
-             NAVIGASI BAWAH
-             ========================================= -->
+        <!-- NAVIGASI BAWAH -->
         <nav class="bottom-nav">
             <a href="#/home" data-link class="nav-item" id="navHome"><i class="fas fa-home nav-icon"></i><span>HOME</span></a>
             <a href="#/promo" data-link class="nav-item" id="navPromo"><i class="fas fa-gift nav-icon"></i><span>PROMO SAYA</span></a>
-            
-            <a href="#/deposit" data-link class="nav-item dana-nav-item" id="danaBtn">
-                <div class="dana-icon-wrapper"><i class="fas fa-wallet nav-icon"></i></div><span>DANA</span>
-            </a>
-
+            <a href="#/deposit" data-link class="nav-item dana-nav-item" id="danaBtn"><div class="dana-icon-wrapper"><i class="fas fa-wallet nav-icon"></i></div><span>DANA</span></a>
             <a href="#/memo" data-link class="nav-item" id="navMemo"><i class="far fa-envelope nav-icon"></i><span>MEMO</span></a>
             <a href="#" class="nav-item" id="navLiveChat"><i class="far fa-comment-dots nav-icon"></i><span>LIVE CHAT</span></a>
         </nav>
@@ -659,5 +411,6 @@
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/sidebar.js"></script> <!-- JS Sidebar Baru -->
 </body>
 </html>
