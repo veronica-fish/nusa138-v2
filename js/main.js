@@ -1,119 +1,246 @@
 // ============================================================
-// BAGIAN 1: LOBI GAME (SOFTAGGREGATOR)
+// BAGIAN 1: KONFIGURASI & ROUTING (URL BERTINGKAT)
 // ============================================================
+const POPULAR_PROVIDERS = ['pgsoft', 'pragmaticplay', 'evolution', 'joker', 'cq9', 'habanero', 'playtech'];
+const POPULAR_GAMES = ['mahjong', 'gates of olympus', 'fortune', 'sweet bonanza', 'starlight', 'aztec', 'wild bandito', 'olympus'];
 
+window.currentCategory = 'slots';
+window.allGamesData = [];
+window.rawProvidersData = [];
+window.rawGamesData = [];
+window.currentGamesData = [];
+window.currentGameIndex = 0;
+window.gamesPerPage = 30;
+
+window.navigateTo = function (path, pushState = true) {
+    if (typeof showLoading === 'function') showLoading();
+    if (pushState) history.pushState({ path: path }, '', path);
+    
+    document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+    
+    const parts = path.split('/').filter(p => p !== '');
+    const mainRoute = parts[0] || 'home';
+
+    // 1. HOME
+    if (mainRoute === 'home' || mainRoute === '') {
+        document.getElementById('homeView')?.classList.add('active');
+        document.getElementById('navHome')?.classList.add('active');
+    } 
+    // 2. LOGIN
+    else if (mainRoute === 'login') {
+        document.getElementById('homeView')?.classList.add('active');
+        if (typeof openLoginPanel === 'function') openLoginPanel();
+    }
+    // 3. DEPOSIT
+    else if (mainRoute === 'deposit') {
+        document.getElementById('depositView')?.classList.add('active');
+        document.getElementById('danaBtn')?.classList.add('active');
+        if (typeof openDepositView === 'function') openDepositView();
+    }
+    // 4. LOBI GAME
+    else if (['slots', 'live', 'sportsbook', 'fishing', 'other'].includes(mainRoute)) {
+        document.getElementById('lobbyView')?.classList.add('active');
+        window.currentCategory = mainRoute;
+        
+        if (parts.length === 1) {
+            if (typeof loadLobby === 'function') loadLobby();
+        } else if (parts.length === 2) {
+            if (typeof loadProviderGamesByURL === 'function') loadProviderGamesByURL(mainRoute, parts[1]);
+        } else if (parts.length === 3) {
+            if (typeof loadGameByURL === 'function') loadGameByURL(mainRoute, parts[1], parts[2]);
+        }
+    }
+    // 5. HALAMAN LAIN
+    else {
+        const viewId = mainRoute + 'View';
+        document.getElementById(viewId)?.classList.add('active');
+    }
+
+    window.scrollTo(0, 0);
+    if (typeof hideLoading === 'function') hideLoading();
+};
+
+window.handleRouting = function () { 
+    navigateTo(window.location.pathname, false); 
+};
+
+
+// ============================================================
+// BAGIAN 2: FUNGSI LOBI & PROVIDER
+// ============================================================
 window.loadLobby = async function() {
     document.getElementById('providerSection').style.display = 'block';
     document.getElementById('gameSection').style.display = 'none';
+    document.getElementById('searchLobbyInput').placeholder = "Cari Provider...";
+    
+    const categoryNames = { 'slots': 'Slots', 'live': 'Live Casino', 'sportsbook': 'Sports', 'fishing': 'Tembak Ikan', 'other': 'Games' };
+    document.getElementById('providerSectionTitle').innerText = `Pilih Provider - ${categoryNames[window.currentCategory] || 'Games'}`;
     
     const providerGrid = document.getElementById('providerGrid');
     providerGrid.innerHTML = '<p style="color: gray; grid-column: span 3; text-align: center;">Memuat provider...</p>';
-
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        const response = await fetch(`https://nusa138.wispbyte.app/api/providers`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        const data = await response.json();
-        if (data.error) throw new Error(data.error);
-
-        providerGrid.innerHTML = ''; 
-
-        if (!data.providers || data.providers.length === 0) {
-            providerGrid.innerHTML = '<p style="color: gray; grid-column: span 3; text-align: center;">Tidak ada provider tersedia.</p>';
-            return;
-        }
-
-        data.providers.forEach(prov => {
-            const card = document.createElement('div');
-            card.style.cssText = "background: #1a1a1a; border: 1px solid #333; border-radius: 8px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; aspect-ratio: 1/1; transition: 0.2s;";
-            card.onmouseover = () => card.style.borderColor = "#7b2cbf";
-            card.onmouseout = () => card.style.borderColor = "#333";
-            
-            card.innerHTML = `
-                <img src="${prov.logo || 'https://via.placeholder.com/100?text=Game'}" style="width: 80%; height: auto; object-fit: contain; margin-bottom: 8px;">
-                <span style="color: white; font-size: 11px; text-align: center; font-weight: bold;">${prov.name}</span>
-            `;
-            card.onclick = () => window.loadProviderGames(prov.provider, prov.name);
-            providerGrid.appendChild(card);
-        });
-    } catch (err) {
-        console.error("Gagal load provider:", err);
-        providerGrid.innerHTML = '<p style="color: red; grid-column: span 3; text-align: center;">Gagal memuat provider. Server Wispbyte mungkin sedang sibuk atau mati.</p>';
-    }
-};
-
-window.loadProviderGames = async function(providerCode, providerName) {
-    document.getElementById('providerSection').style.display = 'none';
-    document.getElementById('gameSection').style.display = 'block';
-    document.getElementById('currentProviderName').innerText = providerName;
-    
-    const gameGrid = document.getElementById('gameGrid');
-    gameGrid.innerHTML = '<p style="color: gray; grid-column: span 3; text-align: center;">Memuat game...</p>';
 
     try {
         const response = await fetch(`https://nusa138.wispbyte.app/api/games`);
         const data = await response.json();
         if (data.error) throw new Error(data.error);
 
-        const filteredGames = data.games.filter(game => game.provider === providerCode);
-        gameGrid.innerHTML = '';
-
-        if (filteredGames.length === 0) {
-            gameGrid.innerHTML = '<p style="color: gray; grid-column: span 3; text-align: center;">Belum ada game untuk provider ini.</p>';
-            return;
+        window.allGamesData = data.games;
+        const gamesInCategory = data.games.filter(g => g.game_type === window.currentCategory);
+        const uniqueProviders = [];
+        const map = new Map();
+        
+        for (const item of gamesInCategory) {
+            if(!map.has(item.provider)){
+                map.set(item.provider, true);
+                uniqueProviders.push({ provider: item.provider, name: item.provider_name || item.provider, logo: item.provider_logo });
+            }
         }
 
-        filteredGames.slice(0, 50).forEach(game => {
-            const card = document.createElement('div');
-            card.style.cssText = "background: #222; border-radius: 8px; overflow: hidden; cursor: pointer; text-align: center; transition: transform 0.2s;";
-            card.onmouseover = () => card.style.transform = "scale(1.05)";
-            card.onmouseout = () => card.style.transform = "scale(1)";
-            
-            const imgUrl = game.image || 'https://via.placeholder.com/150';
-            card.innerHTML = `
-                <img src="${imgUrl}" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;">
-                <div style="padding: 6px 4px; font-size: 10px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${game.name}</div>
-            `;
-            card.onclick = () => window.bukaGame(game.id_hash);
-            gameGrid.appendChild(card);
+        uniqueProviders.sort((a, b) => {
+            const aPop = POPULAR_PROVIDERS.includes(a.provider.toLowerCase());
+            const bPop = POPULAR_PROVIDERS.includes(b.provider.toLowerCase());
+            return (aPop && !bPop) ? -1 : (!aPop && bPop) ? 1 : 0;
         });
+
+        window.rawProvidersData = uniqueProviders;
+        window.renderProviders(window.rawProvidersData);
     } catch (err) {
-        gameGrid.innerHTML = '<p style="color: red; grid-column: span 3; text-align: center;">Gagal memuat daftar game.</p>';
+        providerGrid.innerHTML = '<p style="color: red; grid-column: span 3; text-align: center;">Gagal memuat provider.</p>';
     }
 };
 
-window.backToProviders = function() {
-    document.getElementById('gameSection').style.display = 'none';
-    document.getElementById('providerSection').style.display = 'block';
+window.renderProviders = function(providersList) {
+    const providerGrid = document.getElementById('providerGrid');
+    providerGrid.innerHTML = ''; 
+
+    if (providersList.length === 0) {
+        providerGrid.innerHTML = `<p style="color: gray; grid-column: span 3; text-align: center;">Provider tidak ditemukan.</p>`;
+        return;
+    }
+
+    providersList.forEach(prov => {
+        const card = document.createElement('div');
+        card.style.cssText = "background: linear-gradient(145deg, #2a2a2a, #1a1a1a); box-shadow: 0 4px 8px rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 12px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px; aspect-ratio: 1/1; transition: all 0.3s ease;";
+        card.onmouseover = () => { card.style.transform = "translateY(-5px)"; card.style.borderColor = "#a855f7"; };
+        card.onmouseout = () => { card.style.transform = "translateY(0)"; card.style.borderColor = "#444"; };
+        
+        card.innerHTML = `
+            <img src="${prov.logo || 'https://via.placeholder.com/150/222/FFF?text='+prov.name}" style="width: 90%; height: 60%; object-fit: contain; margin-bottom: 10px;">
+            <span style="color: #fff; font-size: 12px; text-align: center; font-weight: 600; text-shadow: 1px 1px 2px #000;">${prov.name}</span>
+        `;
+        card.onclick = () => window.navigateTo(`/${window.currentCategory}/${prov.provider}`, true);
+        providerGrid.appendChild(card);
+    });
 };
 
-window.bukaGame = async function(idHash) {
-    if (typeof currentSession === 'undefined' || !currentSession || !currentSession.user) {
-        alert("Silakan login terlebih dahulu!");
+window.loadProviderGamesByURL = async function(category, providerCode) {
+    if (window.allGamesData.length === 0) await window.loadLobby();
+    
+    document.getElementById('providerSection').style.display = 'none';
+    document.getElementById('gameSection').style.display = 'block';
+    document.getElementById('searchLobbyInput').placeholder = "Cari Game...";
+    
+    const provObj = window.rawProvidersData.find(p => p.provider === providerCode);
+    document.getElementById('currentProviderName').innerText = provObj ? provObj.name : providerCode;
+    
+    let filteredGames = window.allGamesData.filter(game => game.provider === providerCode && game.game_type === category);
+    
+    filteredGames.sort((a, b) => {
+        const aPop = POPULAR_GAMES.some(kw => a.name.toLowerCase().includes(kw));
+        const bPop = POPULAR_GAMES.some(kw => b.name.toLowerCase().includes(kw));
+        return (aPop && !bPop) ? -1 : (!aPop && bPop) ? 1 : 0;
+    });
+
+    window.rawGamesData = filteredGames;
+    window.currentGamesData = filteredGames;
+    window.currentGameIndex = 0;
+    window.renderGames();
+};
+
+window.renderGames = function() {
+    const gameGrid = document.getElementById('gameGrid');
+    if (window.currentGameIndex === 0) {
+        gameGrid.innerHTML = '';
+        document.getElementById('btnLoadMoreGames')?.remove();
+    }
+
+    if (window.currentGamesData.length === 0) {
+        gameGrid.innerHTML = '<p style="color: gray; grid-column: span 3; text-align: center;">Game tidak ditemukan.</p>';
         return;
+    }
+
+    const endIndex = window.currentGameIndex + window.gamesPerPage;
+    const gamesToRender = window.currentGamesData.slice(window.currentGameIndex, endIndex);
+
+    gamesToRender.forEach(game => {
+        const card = document.createElement('div');
+        card.style.cssText = "background: #222; border-radius: 8px; overflow: hidden; cursor: pointer; text-align: center; transition: transform 0.2s;";
+        card.onmouseover = () => card.style.transform = "scale(1.05)";
+        card.onmouseout = () => card.style.transform = "scale(1)";
+        
+        card.innerHTML = `
+            <img src="${game.image || 'https://via.placeholder.com/150'}" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;">
+            <div style="padding: 6px 4px; font-size: 10px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${game.name}</div>
+        `;
+        
+        // KLIK GAME: Ubah URL ke /kategori/provider/game-slug
+        card.onclick = () => {
+            const slug = game.id_hash.replace(/[^a-zA-Z0-9]/g, '-');
+            window.navigateTo(`/${window.currentCategory}/${game.provider}/${slug}`, true);
+            window.executeBukaGame(game.id_hash);
+        };
+        gameGrid.appendChild(card);
+    });
+
+    window.currentGameIndex = endIndex;
+
+    let btnLoadMore = document.getElementById('btnLoadMoreGames');
+    if (window.currentGameIndex < window.currentGamesData.length) {
+        if (!btnLoadMore) {
+            btnLoadMore = document.createElement('button');
+            btnLoadMore.id = 'btnLoadMoreGames';
+            btnLoadMore.innerText = 'MUAT LEBIH BANYAK';
+            btnLoadMore.style.cssText = "grid-column: span 3; padding: 12px; margin-top: 15px; background: #7b2cbf; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;";
+            btnLoadMore.onclick = () => { btnLoadMore.innerText = 'MEMUAT...'; setTimeout(() => window.renderGames(), 100); };
+            gameGrid.after(btnLoadMore);
+        } else { btnLoadMore.style.display = 'block'; }
+    } else { if (btnLoadMore) btnLoadMore.style.display = 'none'; }
+};
+
+window.backToProviders = function() {
+    window.navigateTo(`/${window.currentCategory}`, true);
+};
+
+// LOGIKA PENCARIAN
+document.getElementById('searchLobbyInput')?.addEventListener('input', function(e) {
+    const keyword = e.target.value.toLowerCase();
+    if (document.getElementById('providerSection').style.display === 'block') {
+        const filtered = window.rawProvidersData.filter(p => p.name.toLowerCase().includes(keyword));
+        window.renderProviders(filtered);
+    } else {
+        const filtered = window.rawGamesData.filter(g => g.name.toLowerCase().includes(keyword));
+        window.currentGamesData = filtered;
+        window.currentGameIndex = 0;
+        window.renderGames();
+    }
+});
+
+// EKSEKUSI BUKA GAME (Hit API Wispbyte)
+window.executeBukaGame = async function(idHash) {
+    if (typeof currentSession === 'undefined' || !currentSession || !currentSession.user) {
+        alert("Silakan login terlebih dahulu!"); window.navigateTo('/login', true); return;
     }
     const username = currentSession.user.user_metadata.username;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (typeof showLoading === 'function') showLoading();
-
     try {
         const response = await fetch(`https://nusa138.wispbyte.app/api/get-game`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                username: username, 
-                gameCode: idHash,
-                device: isMobile ? 'mobile' : 'desktop' 
-            })
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: username, gameCode: idHash, device: isMobile ? 'mobile' : 'desktop' })
         });
         const data = await response.json();
         if (typeof hideLoading === 'function') hideLoading();
-
         if (data.error) alert("Gagal membuka game: " + data.error);
         else window.open(data.url, '_blank');
     } catch (err) {
@@ -124,22 +251,20 @@ window.bukaGame = async function(idHash) {
 
 
 // ============================================================
-// BAGIAN 2: WITHDRAW & FORMAT ANGKA (ANTI-HACK RPC)
+// BAGIAN 3: WITHDRAW, DEPOSIT, & UI LAINNYA
 // ============================================================
 document.body.addEventListener('input', function (e) {
     if (e.target.id !== 'withdrawAmount') return;
     let value = e.target.value.replace(/[^0-9]/g, '');
     if (value) { e.target.value = parseInt(value, 10).toLocaleString('en-US'); } else { e.target.value = ''; }
-    const errMsg = document.getElementById('withdrawErrorMsg');
-    if (errMsg) errMsg.style.display = 'none';
+    document.getElementById('withdrawErrorMsg').style.display = 'none';
     e.target.style.borderColor = '#555';
 });
 
 document.body.addEventListener('change', function (e) {
     if (e.target.id !== 'withdrawBankSelect') return;
     e.target.style.borderColor = '#555';
-    const errMsg = document.getElementById('withdrawErrorMsg');
-    if (errMsg) errMsg.style.display = 'none';
+    document.getElementById('withdrawErrorMsg').style.display = 'none';
     const opt = e.target.options[e.target.selectedIndex];
     const nameEl = document.getElementById('withdrawAccountName');
     if (nameEl && opt && opt.dataset.accountName) nameEl.value = opt.dataset.accountName;
@@ -157,44 +282,32 @@ document.body.addEventListener('click', async function (e) {
     const withdrawAmountInput = document.getElementById('withdrawAmount');
     const withdrawErrorMsg = document.getElementById('withdrawErrorMsg');
     const withdrawBankSelect = document.getElementById('withdrawBankSelect');
-
     const amount = parseInt(withdrawAmountInput.value.replace(/[.,\s]/g, ''), 10);
-    const selectedBankValue = withdrawBankSelect.value;
-
+    
     withdrawErrorMsg.style.display = 'none';
     withdrawAmountInput.style.borderColor = '#555';
     withdrawBankSelect.style.borderColor = '#555';
 
     if (!amount || isNaN(amount) || amount < 50000) {
-        withdrawErrorMsg.textContent = 'Minimal penarikan adalah Rp 50.000';
-        withdrawErrorMsg.style.display = 'block';
-        withdrawAmountInput.style.borderColor = '#ff3333'; return;
+        withdrawErrorMsg.textContent = 'Minimal penarikan Rp 50.000';
+        withdrawErrorMsg.style.display = 'block'; withdrawAmountInput.style.borderColor = '#ff3333'; return;
     }
-    if (!selectedBankValue) {
+    if (!withdrawBankSelect.value) {
         withdrawErrorMsg.textContent = 'Pilih akun bank terdaftar!';
-        withdrawErrorMsg.style.display = 'block';
-        withdrawBankSelect.style.borderColor = '#ff3333'; return;
+        withdrawErrorMsg.style.display = 'block'; withdrawBankSelect.style.borderColor = '#ff3333'; return;
     }
 
     const selectedOption = withdrawBankSelect.options[withdrawBankSelect.selectedIndex];
-    const bankName = selectedOption.dataset.bankName;
-    const accountNumber = selectedOption.dataset.accountNumber;
-    const accountName = selectedOption.dataset.accountName;
-
-    btn.disabled = true;
-    btn.innerText = 'MEMPROSES...';
+    btn.disabled = true; btn.innerText = 'MEMPROSES...';
 
     try {
         const { data: isSuccess, error } = await supabaseClient.rpc('request_withdraw', {
-            payload: { amount, bank_name: bankName, account_number: accountNumber, account_name: accountName }
+            payload: { amount: amount, bank_name: selectedOption.dataset.bankName, account_number: selectedOption.dataset.accountNumber, account_name: selectedOption.dataset.accountName }
         });
-
         if (error) throw new Error(error.message);
-
         if (!isSuccess) {
             withdrawErrorMsg.textContent = 'Saldo tidak cukup!';
-            withdrawErrorMsg.style.display = 'block';
-            withdrawAmountInput.style.borderColor = '#ff3333';
+            withdrawErrorMsg.style.display = 'block'; withdrawAmountInput.style.borderColor = '#ff3333';
         } else {
             alert(`✅ Penarikan Rp ${amount.toLocaleString('id-ID')} berhasil!`);
             withdrawAmountInput.value = ''; withdrawBankSelect.value = '';
@@ -209,68 +322,26 @@ document.body.addEventListener('click', async function (e) {
 });
 
 
-// ============================================================
-// BAGIAN 3: LOGIKA UI LAINNYA
-// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof supabaseClient === 'undefined') return;
 
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (typeof checkAuthState === 'function') checkAuthState(session);
-        if (typeof handleRouting === 'function') handleRouting();
+        window.handleRouting(); 
     });
     
     supabaseClient.auth.onAuthStateChange((_event, session) => {
         if (typeof checkAuthState === 'function') checkAuthState(session);
     });
 
-    const routes = {
-        '/home': 'homeView', '/': 'homeView', '/promo': 'promoView', '/memo': 'memoView',
-        '/deposit': 'depositView', '/about': 'aboutView', '/banking': 'bankingView', '/lobby': 'lobbyView'
-    };
-
     window.showLoading = function () { document.getElementById('loadingOverlay')?.classList.add('active'); };
     window.hideLoading = function () { document.getElementById('loadingOverlay')?.classList.remove('active'); };
-
-    window.navigateTo = function (path, pushState = true) {
-        showLoading();
-        setTimeout(() => {
-            document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
-            let targetViewId = routes[path] || 'homeView';
-            
-            if (!currentSession && targetViewId !== 'homeView') {
-                hideLoading(); if (typeof openLoginPanel === 'function') openLoginPanel(); return;
-            }
-
-            const targetView = document.getElementById(targetViewId);
-            if (targetView) { targetView.classList.add('active'); window.scrollTo(0, 0); }
-
-            if (targetViewId === 'depositView' && typeof openDepositView === 'function') openDepositView(); 
-            if (targetViewId === 'lobbyView' && typeof loadLobby === 'function') loadLobby();
-
-            if (pushState) history.pushState({ path: path }, '', path);
-            
-            document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
-            if (targetViewId === 'homeView') document.getElementById('navHome')?.classList.add('active');
-            if (targetViewId === 'depositView') document.getElementById('danaBtn')?.classList.add('active');
-
-            hideLoading();
-        }, 300);
-    };
-
-    window.handleRouting = function () { navigateTo(window.location.pathname, false); };
-    window.addEventListener('popstate', () => handleRouting());
-
-    document.body.addEventListener('click', (e) => {
-        const link = e.target.closest('a[data-link]');
-        if (link) { e.preventDefault(); navigateTo(link.getAttribute('href'), true); }
-    });
+    window.addEventListener('popstate', () => window.handleRouting());
 
     const headerUserBtn = document.getElementById('headerUserBtn');
     if (headerUserBtn) {
         headerUserBtn.addEventListener('click', () => {
-            if (currentSession) openProfilePanel();
-            else openLoginPanel();
+            if (currentSession) openProfilePanel(); else window.navigateTo('/login', true);
         });
     }
 
@@ -278,23 +349,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const track = document.getElementById('bannerTrack');
     if (track) {
         let currentIndex = 0;
-        setInterval(() => {
-            currentIndex = (currentIndex + 1) % 3;
-            track.style.transform = `translateX(${currentIndex * -33.3333}%)`;
-        }, 5000);
+        setInterval(() => { currentIndex = (currentIndex + 1) % 3; track.style.transform = `translateX(${currentIndex * -33.3333}%)`; }, 5000);
     }
 
     // Live Transaksi
     const transTrack = document.getElementById('transTrack');
     if (transTrack) {
         let transIndex = 0;
-        setInterval(() => {
-            transIndex = (transIndex + 1) % 3;
-            transTrack.style.transform = `translateX(calc(-${transIndex * 50}% - ${transIndex * 6}px))`;
-        }, 4000);
+        setInterval(() => { transIndex = (transIndex + 1) % 3; transTrack.style.transform = `translateX(calc(-${transIndex * 50}% - ${transIndex * 6}px))`; }, 4000);
     }
 
-    // Login Form (Jika Anda punya logikanya di auth.js, biarkan. Ini backup jika tidak ada)
+    // Login
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
@@ -304,16 +369,14 @@ document.addEventListener('DOMContentLoaded', () => {
             btnLogin.innerText = "MEMPROSES...";
             const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) alert("Login Gagal: " + error.message);
-            else alert("Login Berhasil!");
+            else { alert("Login Berhasil!"); window.navigateTo('/home', true); }
             btnLogin.innerText = "Login";
         });
     }
 
-    // Deposit & QRIS
+    // Deposit
     window.openDepositView = async function () {
-        if (!currentSession) { if(typeof openLoginPanel === 'function') openLoginPanel(); return; }
-        document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
-        document.getElementById('depositView')?.classList.add('active');
+        if (!currentSession) { window.navigateTo('/login', true); return; }
         
         document.getElementById('formInputArea').style.display = 'block';
         document.getElementById('qrisArea').style.display = 'none';
@@ -376,20 +439,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // FAQ Accordion
     document.querySelectorAll('.faq-question').forEach(question => {
         question.addEventListener('click', function () {
             const answer = this.nextElementSibling;
             const icon = this.querySelector('i');
             if (!answer || !icon) return;
             if (answer.style.maxHeight) {
-                answer.style.maxHeight = null;
-                icon.classList.replace('fa-minus', 'fa-plus');
+                answer.style.maxHeight = null; icon.classList.replace('fa-minus', 'fa-plus');
             } else {
                 document.querySelectorAll('.faq-answer').forEach(ans => ans.style.maxHeight = null);
                 document.querySelectorAll('.faq-question i').forEach(ic => ic.classList.replace('fa-minus', 'fa-plus'));
-                answer.style.maxHeight = answer.scrollHeight + "px";
-                icon.classList.replace('fa-plus', 'fa-minus');
+                answer.style.maxHeight = answer.scrollHeight + "px"; icon.classList.replace('fa-plus', 'fa-minus');
             }
         });
     });
