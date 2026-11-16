@@ -1,5 +1,5 @@
 // ============================================================
-// BAGIAN 1: ROUTING HASH (#)
+// BAGIAN 1: ROUTING HASH (#) & TRANSISI LOADING
 // ============================================================
 window.navigateTo = function (path, pushState = true) {
     if (typeof path !== 'string') {
@@ -7,6 +7,7 @@ window.navigateTo = function (path, pushState = true) {
         path = '/home'; 
     }
 
+    // Tampilkan Loading Overlay
     if (typeof showLoading === 'function') showLoading();
     
     if (pushState) {
@@ -15,44 +16,49 @@ window.navigateTo = function (path, pushState = true) {
         }
     }
     
-    document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
-    const parts = path.split('/').filter(p => p !== '');
-    const mainRoute = parts[0] || 'home';
+    // Beri jeda sedikit agar animasi loading terlihat sebelum halaman berubah
+    setTimeout(() => {
+        document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+        const parts = path.split('/').filter(p => p !== '');
+        const mainRoute = parts[0] || 'home';
 
-    // Logika Halaman
-    if (mainRoute === 'home' || mainRoute === '') {
-        document.getElementById('homeView')?.classList.add('active');
-        document.getElementById('navHome')?.classList.add('active');
-    } 
-    else if (mainRoute === 'login') {
-        document.getElementById('homeView')?.classList.add('active');
-        if (typeof openLoginPanel === 'function') openLoginPanel();
-    }
-    else if (mainRoute === 'deposit') {
-        document.getElementById('depositView')?.classList.add('active');
-        document.getElementById('danaBtn')?.classList.add('active');
-        if (typeof openDepositView === 'function') openDepositView();
-    }
-    else if (mainRoute === 'contact') {
-        document.getElementById('contactView')?.classList.add('active');
-    }
-    else if (mainRoute === 'pengaduan') {
-        document.getElementById('pengaduanView')?.classList.add('active');
-    }
-    else if (['slots', 'live', 'sportsbook', 'fishing', 'other'].includes(mainRoute)) {
-        document.getElementById('lobbyView')?.classList.add('active');
-        window.currentCategory = mainRoute;
-        if (parts.length === 1) { if (typeof loadLobby === 'function') loadLobby(); }
-        else if (parts.length === 2) { if (typeof loadProviderGamesByURL === 'function') loadProviderGamesByURL(mainRoute, parts[1]); }
-        else if (parts.length === 3) { if (typeof loadGameByURL === 'function') loadGameByURL(mainRoute, parts[1], parts[2]); }
-    }
-    else {
-        const viewId = mainRoute + 'View';
-        document.getElementById(viewId)?.classList.add('active');
-    }
+        // Logika Halaman
+        if (mainRoute === 'home' || mainRoute === '') {
+            document.getElementById('homeView')?.classList.add('active');
+            document.getElementById('navHome')?.classList.add('active');
+        } 
+        else if (mainRoute === 'login') {
+            document.getElementById('homeView')?.classList.add('active');
+            if (typeof openLoginPanel === 'function') openLoginPanel();
+        }
+        else if (mainRoute === 'deposit') {
+            document.getElementById('depositView')?.classList.add('active');
+            document.getElementById('danaBtn')?.classList.add('active');
+            if (typeof openDepositView === 'function') openDepositView();
+        }
+        else if (mainRoute === 'contact') {
+            document.getElementById('contactView')?.classList.add('active');
+        }
+        else if (mainRoute === 'pengaduan') {
+            document.getElementById('pengaduanView')?.classList.add('active');
+        }
+        else if (['slots', 'live', 'sportsbook', 'fishing', 'other'].includes(mainRoute)) {
+            document.getElementById('lobbyView')?.classList.add('active');
+            window.currentCategory = mainRoute;
+            if (parts.length === 1) { if (typeof loadLobby === 'function') loadLobby(); }
+            else if (parts.length === 2) { if (typeof loadProviderGamesByURL === 'function') loadProviderGamesByURL(mainRoute, parts[1]); }
+            else if (parts.length === 3) { if (typeof loadGameByURL === 'function') loadGameByURL(mainRoute, parts[1], parts[2]); }
+        }
+        else {
+            const viewId = mainRoute + 'View';
+            document.getElementById(viewId)?.classList.add('active');
+        }
 
-    window.scrollTo(0, 0);
-    if (typeof hideLoading === 'function') hideLoading();
+        window.scrollTo(0, 0);
+        
+        // Sembunyikan Loading Overlay setelah halaman selesai berubah
+        if (typeof hideLoading === 'function') hideLoading();
+    }, 400); // Jeda 400ms (bisa disesuaikan)
 };
 
 window.handleRouting = function () { 
@@ -614,14 +620,52 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const talksiloWidget = document.querySelector('iframe[src*="talksilo"]') || document.querySelector('#talksilo-widget-container');
             if (talksiloWidget) {
-                // TalkSilo terkadang disembunyikan dengan display: none. Kita munculkan sementara.
                 talksiloWidget.style.display = 'block';
                 talksiloWidget.style.zIndex = '999999';
-                // Coba klik iframe atau tombol di dalamnya (jika cross-origin, ini mungkin gagal)
                 const btn = talksiloWidget.contentDocument?.querySelector('button') || talksiloWidget;
                 btn.click();
             } else {
                 alert('Memuat Live Chat... Silakan coba klik lagi.');
+            }
+        });
+    }
+
+    // ============================================================
+    // LOGIKA TOMBOL REFRESH SALDO (YANG DIPERBAIKI)
+    // ============================================================
+    const refreshBtn = document.querySelector('.refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', async () => {
+            // Animasi putar pada ikon
+            const icon = refreshBtn.querySelector('i');
+            if(icon) {
+                icon.style.transition = 'transform 0.5s ease';
+                icon.style.transform = 'rotate(360deg)';
+                setTimeout(() => { icon.style.transform = 'rotate(0deg)'; icon.style.transition = 'none'; }, 500);
+            }
+
+            // Ambil saldo terbaru dari Supabase
+            if (currentSession && currentSession.user) {
+                // Jika auth.js memiliki fungsi fetchUserBalance
+                if (typeof fetchUserBalance === 'function') {
+                    fetchUserBalance(currentSession.user);
+                } else {
+                    // Fallback: Tarik manual dari database
+                    const { data } = await supabaseClient.from('profiles').select('balance').eq('id', currentSession.user.id).single();
+                    if (data) {
+                        const newBalance = parseFloat(data.balance) || 0;
+                        const formatted = 'IDR ' + newBalance.toLocaleString('id-ID', { minimumFractionDigits: 2 });
+                        
+                        const topBalance = document.getElementById('topBalance');
+                        if (topBalance) topBalance.innerText = formatted;
+                        
+                        const profileBalance = document.getElementById('profileBalance');
+                        if (profileBalance) profileBalance.innerText = formatted;
+                        
+                        const withdrawBalance = document.getElementById('withdrawBalance');
+                        if (withdrawBalance) withdrawBalance.innerText = formatted;
+                    }
+                }
             }
         });
     }
