@@ -606,4 +606,23 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById(this.getAttribute('data-target'))?.classList.add('active');
         });
     });
+
+    // LOGIKA TOMBOL LIVE CHAT (TALKSILO)
+    const navLiveChat = document.getElementById('navLiveChat');
+    if (navLiveChat) {
+        navLiveChat.addEventListener('click', (e) => {
+            e.preventDefault();
+            const talksiloWidget = document.querySelector('iframe[src*="talksilo"]') || document.querySelector('#talksilo-widget-container');
+            if (talksiloWidget) {
+                // TalkSilo terkadang disembunyikan dengan display: none. Kita munculkan sementara.
+                talksiloWidget.style.display = 'block';
+                talksiloWidget.style.zIndex = '999999';
+                // Coba klik iframe atau tombol di dalamnya (jika cross-origin, ini mungkin gagal)
+                const btn = talksiloWidget.contentDocument?.querySelector('button') || talksiloWidget;
+                btn.click();
+            } else {
+                alert('Memuat Live Chat... Silakan coba klik lagi.');
+            }
+        });
+    }
 });
