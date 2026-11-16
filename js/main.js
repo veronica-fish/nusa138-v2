@@ -2,9 +2,13 @@
 // BAGIAN 1: ROUTING HASH (#)
 // ============================================================
 window.navigateTo = function (path, pushState = true) {
+    if (typeof path !== 'string') {
+        console.warn("navigateTo menerima data yang salah:", path);
+        path = '/home'; 
+    }
+
     if (typeof showLoading === 'function') showLoading();
     
-    // Menggunakan Hash (#) untuk mencegah error 404 dan merusak CSS
     if (pushState) {
         if (window.location.hash !== '#' + path) {
             window.location.hash = path;
@@ -28,6 +32,12 @@ window.navigateTo = function (path, pushState = true) {
         document.getElementById('depositView')?.classList.add('active');
         document.getElementById('danaBtn')?.classList.add('active');
         if (typeof openDepositView === 'function') openDepositView();
+    }
+    else if (mainRoute === 'contact') {
+        document.getElementById('contactView')?.classList.add('active');
+    }
+    else if (mainRoute === 'pengaduan') {
+        document.getElementById('pengaduanView')?.classList.add('active');
     }
     else if (['slots', 'live', 'sportsbook', 'fishing', 'other'].includes(mainRoute)) {
         document.getElementById('lobbyView')?.classList.add('active');
@@ -92,7 +102,6 @@ window.loadLobby = async function() {
             }
         }
 
-        // Sortir Provider Terpopuler
         uniqueProviders.sort((a, b) => {
             const aPop = POPULAR_PROVIDERS.includes(a.provider.toLowerCase());
             const bPop = POPULAR_PROVIDERS.includes(b.provider.toLowerCase());
@@ -106,7 +115,7 @@ window.loadLobby = async function() {
     }
 };
 
-// DESAIN PROVIDER BARU (LEBIH PREMIUM)
+// DESAIN PROVIDER PREMIUM
 window.renderProviders = function(providersList) {
     const providerGrid = document.getElementById('providerGrid');
     providerGrid.innerHTML = ''; 
@@ -118,25 +127,20 @@ window.renderProviders = function(providersList) {
 
     providersList.forEach(prov => {
         const card = document.createElement('div');
-        
-        // Background gradient gelap, border tipis, dan sudut melengkung
         card.style.cssText = "background: linear-gradient(180deg, #1f1f1f 0%, #0d0d0d 100%); box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 0 0 1px #333; border-radius: 12px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 8px; aspect-ratio: 1/1; transition: all 0.3s ease;";
         
-        // Efek Hover: Kotak naik sedikit dan memancarkan cahaya ungu
         card.onmouseover = () => { 
             card.style.transform = "translateY(-5px)"; 
             card.style.boxShadow = "0 8px 20px rgba(123, 44, 191, 0.6), inset 0 0 0 1px #a855f7"; 
             card.style.background = "linear-gradient(180deg, #2a2a2a 0%, #111 100%)";
         };
         
-        // Efek saat kursor meninggalkan kotak
         card.onmouseout = () => { 
             card.style.transform = "translateY(0)"; 
             card.style.boxShadow = "0 4px 15px rgba(0,0,0,0.6), inset 0 0 0 1px #333"; 
             card.style.background = "linear-gradient(180deg, #1f1f1f 0%, #0d0d0d 100%)";
         };
         
-        // Logo & Teks
         card.innerHTML = `
             <div style="width: 90%; height: 60%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
                 <img src="${prov.logo || 'https://via.placeholder.com/150/111/FFF?text='+prov.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
@@ -160,7 +164,6 @@ window.loadProviderGamesByURL = async function(category, providerCode) {
     
     let filteredGames = window.allGamesData.filter(game => game.provider === providerCode && game.game_type === category);
     
-    // Sortir Game Terpopuler
     filteredGames.sort((a, b) => {
         const aPop = POPULAR_GAMES.some(kw => a.name.toLowerCase().includes(kw));
         const bPop = POPULAR_GAMES.some(kw => b.name.toLowerCase().includes(kw));
@@ -217,7 +220,6 @@ window.renderGames = function() {
 
     window.currentGameIndex = endIndex;
 
-    // Tombol Load More
     let btnLoadMore = document.getElementById('btnLoadMoreGames');
     if (window.currentGameIndex < window.currentGamesData.length) {
         if (!btnLoadMore) {
@@ -233,7 +235,6 @@ window.renderGames = function() {
 
 window.backToProviders = function() { window.navigateTo(`/${window.currentCategory}`, true); };
 
-// Pencarian Game/Provider
 document.getElementById('searchLobbyInput')?.addEventListener('input', function(e) {
     const keyword = e.target.value.toLowerCase();
     if (document.getElementById('providerSection').style.display === 'block') {
@@ -361,12 +362,68 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.addEventListener('hashchange', () => window.handleRouting());
 
+    // TOMBOL HEADER
     const headerUserBtn = document.getElementById('headerUserBtn');
     if (headerUserBtn) {
         headerUserBtn.addEventListener('click', () => {
             if (currentSession) openProfilePanel(); else window.navigateTo('/login', true);
         });
     }
+
+    const headerSearchBtn = document.getElementById('headerSearchBtn');
+    if (headerSearchBtn) {
+        headerSearchBtn.addEventListener('click', () => {
+            window.navigateTo('/slots', true);
+            setTimeout(() => {
+                const searchInput = document.getElementById('searchLobbyInput');
+                if (searchInput) searchInput.focus();
+            }, 400);
+        });
+    }
+
+    // LOGIKA FORM PENGADUAN
+    const btnSubmitPengaduan = document.getElementById('btnSubmitPengaduan');
+    if (btnSubmitPengaduan) {
+        btnSubmitPengaduan.addEventListener('click', function() {
+            const username = document.getElementById('pdUsername').value.trim();
+            const email = document.getElementById('pdEmail').value.trim();
+            const kategori = document.getElementById('pdKategori').value;
+            const pesan = document.getElementById('pdPesan').value.trim();
+
+            if (!username || !email || !kategori || !pesan) {
+                alert("Mohon lengkapi Username, Email, Kategori Keluhan, dan Pesan Anda!");
+                return;
+            }
+
+            document.getElementById('modalPengaduan').style.display = 'flex';
+
+            document.getElementById('pdUsername').value = '';
+            document.getElementById('pdEmail').value = '';
+            document.getElementById('pdKategori').value = '';
+            document.getElementById('pdPesan').value = '';
+        });
+    }
+
+    // TABS PROMO & MEMO
+    document.querySelectorAll('.promo-tab').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.promo-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.promo-content .tab-pane').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            const target = document.getElementById(this.getAttribute('data-target'));
+            if (target) target.classList.add('active');
+        });
+    });
+
+    document.querySelectorAll('.memo-tab').forEach(tab => {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.memo-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.memo-content .tab-pane').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            const target = document.getElementById(this.getAttribute('data-target'));
+            if (target) target.classList.add('active');
+        });
+    });
 
     // Banner Slider
     const track = document.getElementById('bannerTrack');
@@ -424,7 +481,6 @@ document.addEventListener('DOMContentLoaded', () => {
         populateCards(); startTransSlider();
     }
 
-    // Login Action
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
@@ -439,7 +495,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Buka Halaman Deposit (Form)
     window.openDepositView = async function () {
         if (!currentSession) { window.navigateTo('/login', true); return; }
         document.getElementById('formInputArea').style.display = 'block';
@@ -464,7 +519,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Buat QRIS
     const btnShowQris = document.getElementById('btnShowQris');
     if (btnShowQris) {
         btnShowQris.addEventListener('click', async () => {
@@ -488,7 +542,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Kembali dari QRIS
     if (document.getElementById('btnBackToForm')) {
         document.getElementById('btnBackToForm').addEventListener('click', () => {
             document.getElementById('qrisArea').style.display = 'none';
@@ -496,7 +549,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Tabs Deposit (Deposit / Withdraw / History)
     document.querySelectorAll('.deposit-tab').forEach(tab => {
         tab.addEventListener('click', function () {
             document.querySelectorAll('.deposit-tab').forEach(t => t.classList.remove('active'));
@@ -506,7 +558,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // FAQ Accordion
     document.querySelectorAll('.faq-question').forEach(question => {
         question.addEventListener('click', function () {
             const answer = this.nextElementSibling;
