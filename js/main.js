@@ -115,7 +115,6 @@ window.loadLobby = async function() {
     }
 };
 
-// DESAIN PROVIDER PREMIUM
 window.renderProviders = function(providersList) {
     const providerGrid = document.getElementById('providerGrid');
     providerGrid.innerHTML = ''; 
@@ -404,6 +403,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // LOGIKA FAQ (ACCORDION)
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    faqQuestions.forEach(question => {
+        question.addEventListener('click', function () {
+            const answer = this.nextElementSibling;
+            const icon = this.querySelector('i');
+            if (!answer || !icon) return;
+            if (answer.style.maxHeight && answer.style.maxHeight !== '0px') {
+                answer.style.maxHeight = null; icon.classList.replace('fa-minus', 'fa-plus');
+            } else {
+                document.querySelectorAll('.faq-answer').forEach(ans => ans.style.maxHeight = null);
+                document.querySelectorAll('.faq-question i').forEach(ic => ic.classList.replace('fa-minus', 'fa-plus'));
+                answer.style.maxHeight = answer.scrollHeight + "px"; icon.classList.replace('fa-plus', 'fa-minus');
+            }
+        });
+    });
+
     // TABS PROMO & MEMO
     document.querySelectorAll('.promo-tab').forEach(btn => {
         btn.addEventListener('click', function () {
@@ -481,17 +497,50 @@ document.addEventListener('DOMContentLoaded', () => {
         populateCards(); startTransSlider();
     }
 
+    // LOGIKA LOGIN (HANYA USERNAME)
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
-            const email = document.getElementById('loginEmail').value.trim();
+            const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
-            if (!email || !password) return alert("Isi email dan password!");
+            
+            if (!username || !password) return alert("Mohon isi Username dan Kata Sandi!");
+
             btnLogin.innerText = "MEMPROSES...";
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) alert("Login Gagal: " + error.message);
-            else { alert("Login Berhasil!"); window.navigateTo('/home', true); }
-            btnLogin.innerText = "Login";
+            btnLogin.disabled = true;
+
+            try {
+                const { data: profileData, error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .select('email')
+                    .eq('username', username)
+                    .single();
+
+                if (profileError || !profileData) {
+                    alert("Username tidak ditemukan!");
+                    btnLogin.innerText = "Login";
+                    btnLogin.disabled = false;
+                    return;
+                }
+
+                const { error: authError } = await supabaseClient.auth.signInWithPassword({ 
+                    email: profileData.email, 
+                    password: password 
+                });
+
+                if (authError) {
+                    alert("Login Gagal: Kata sandi salah.");
+                } else {
+                    alert("Login Berhasil!");
+                    window.navigateTo('/home', true);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Terjadi kesalahan sistem.");
+            } finally {
+                btnLogin.innerText = "Login";
+                btnLogin.disabled = false;
+            }
         });
     }
 
