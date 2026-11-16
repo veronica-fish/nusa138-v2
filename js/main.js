@@ -16,7 +16,7 @@ window.navigateTo = function (path, pushState = true) {
         }
     }
     
-    // Beri jeda sedikit agar animasi loading terlihat sebelum halaman berubah
+    // DURASI DIPERLAMA MENJADI 800ms AGAR LEBIH TERASA
     setTimeout(() => {
         document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
         const parts = path.split('/').filter(p => p !== '');
@@ -58,7 +58,7 @@ window.navigateTo = function (path, pushState = true) {
         
         // Sembunyikan Loading Overlay setelah halaman selesai berubah
         if (typeof hideLoading === 'function') hideLoading();
-    }, 400); // Jeda 400ms (bisa disesuaikan)
+    }, 800); 
 };
 
 window.handleRouting = function () { 
@@ -426,24 +426,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // TABS PROMO & MEMO
+    // LOGIKA TABS PROMO (DENGAN LOADING)
     document.querySelectorAll('.promo-tab').forEach(btn => {
         btn.addEventListener('click', function () {
-            document.querySelectorAll('.promo-tab').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.promo-content .tab-pane').forEach(p => p.classList.remove('active'));
-            this.classList.add('active');
+            if (this.classList.contains('active')) return; 
+            if (typeof showLoading === 'function') showLoading();
+
             const target = document.getElementById(this.getAttribute('data-target'));
-            if (target) target.classList.add('active');
+            
+            setTimeout(() => {
+                document.querySelectorAll('.promo-tab').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.promo-content .tab-pane').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                if (target) target.classList.add('active');
+                if (typeof hideLoading === 'function') hideLoading();
+            }, 500);
         });
     });
 
+    // LOGIKA TABS MEMO (DENGAN LOADING)
     document.querySelectorAll('.memo-tab').forEach(tab => {
         tab.addEventListener('click', function () {
-            document.querySelectorAll('.memo-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.memo-content .tab-pane').forEach(p => p.classList.remove('active'));
-            this.classList.add('active');
+            if (this.classList.contains('active')) return; 
+            if (typeof showLoading === 'function') showLoading();
+
             const target = document.getElementById(this.getAttribute('data-target'));
-            if (target) target.classList.add('active');
+            
+            setTimeout(() => {
+                document.querySelectorAll('.memo-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.memo-content .tab-pane').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                if (target) target.classList.add('active');
+                if (typeof hideLoading === 'function') hideLoading();
+            }, 500);
+        });
+    });
+
+    // LOGIKA TABS DEPOSIT (DENGAN LOADING)
+    document.querySelectorAll('.deposit-tab').forEach(tab => {
+        tab.addEventListener('click', function () {
+            if (this.classList.contains('active')) return; 
+            if (typeof showLoading === 'function') showLoading();
+
+            const targetId = this.getAttribute('data-target');
+            
+            setTimeout(() => {
+                document.querySelectorAll('.deposit-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.deposit-pane').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(targetId)?.classList.add('active');
+                if (typeof hideLoading === 'function') hideLoading();
+            }, 500);
         });
     });
 
@@ -603,15 +636,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('formInputArea').style.display = 'block';
         });
     }
-    
-    document.querySelectorAll('.deposit-tab').forEach(tab => {
-        tab.addEventListener('click', function () {
-            document.querySelectorAll('.deposit-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.deposit-pane').forEach(p => p.classList.remove('active'));
-            this.classList.add('active');
-            document.getElementById(this.getAttribute('data-target'))?.classList.add('active');
-        });
-    });
 
     // LOGIKA TOMBOL LIVE CHAT (TALKSILO)
     const navLiveChat = document.getElementById('navLiveChat');
@@ -631,12 +655,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ============================================================
-    // LOGIKA TOMBOL REFRESH SALDO (YANG DIPERBAIKI)
+    // LOGIKA TOMBOL REFRESH SALDO
     // ============================================================
     const refreshBtn = document.querySelector('.refresh-btn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', async () => {
-            // Animasi putar pada ikon
             const icon = refreshBtn.querySelector('i');
             if(icon) {
                 icon.style.transition = 'transform 0.5s ease';
@@ -644,13 +667,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => { icon.style.transform = 'rotate(0deg)'; icon.style.transition = 'none'; }, 500);
             }
 
-            // Ambil saldo terbaru dari Supabase
             if (currentSession && currentSession.user) {
-                // Jika auth.js memiliki fungsi fetchUserBalance
                 if (typeof fetchUserBalance === 'function') {
                     fetchUserBalance(currentSession.user);
                 } else {
-                    // Fallback: Tarik manual dari database
                     const { data } = await supabaseClient.from('profiles').select('balance').eq('id', currentSession.user.id).single();
                     if (data) {
                         const newBalance = parseFloat(data.balance) || 0;
