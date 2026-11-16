@@ -70,16 +70,17 @@
                 <button class="auth-tab-btn daftar-tab" onclick="openRegisterView()">DAFTAR</button>
             </div>
 
+            <!-- KATEGORI GAME (Telah ditambahkan onclick untuk memanggil bukaGame) -->
             <section class="category-grid">
-                <div class="category-item"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-dice"></i></div><span>SLOTS</span></div>
-                <div class="category-item"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-tv"></i></div><span>LIVE GAMES</span></div>
-                <div class="category-item"><div class="cat-icon"><i class="fas fa-futbol"></i></div><span>SPORTS</span></div>
-                <div class="category-item"><div class="cat-icon"><i class="fas fa-diamond"></i></div><span>CASINO</span></div>
-                <div class="category-item"><div class="cat-icon"><i class="fas fa-clone"></i></div><span>P2P</span></div>
-                <div class="category-item"><div class="cat-icon"><i class="fas fa-kiwi-bird"></i></div><span>SABUNG AYAM</span></div>
-                <div class="category-item"><div class="cat-icon"><i class="fas fa-fish"></i></div><span>TEMBAK IKAN</span></div>
-                <div class="category-item"><div class="badge-tag new">NEW</div><div class="cat-icon"><i class="fas fa-dice-d20"></i></div><span>LOTRE</span></div>
-                <div class="category-item"><div class="cat-icon"><i class="fas fa-gamepad"></i></div><span>E-GAMES</span></div>
+                <div class="category-item" onclick="bukaGame('FORTUNE_DRAGON')"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-dice"></i></div><span>SLOTS</span></div>
+                <div class="category-item" onclick="bukaGame('LIVE_BACCARAT')"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-tv"></i></div><span>LIVE GAMES</span></div>
+                <div class="category-item" onclick="bukaGame('SPORTS')"><div class="cat-icon"><i class="fas fa-futbol"></i></div><span>SPORTS</span></div>
+                <div class="category-item" onclick="bukaGame('CASINO')"><div class="cat-icon"><i class="fas fa-diamond"></i></div><span>CASINO</span></div>
+                <div class="category-item" onclick="bukaGame('P2P')"><div class="cat-icon"><i class="fas fa-clone"></i></div><span>P2P</span></div>
+                <div class="category-item" onclick="bukaGame('SABUNG_AYAM')"><div class="cat-icon"><i class="fas fa-kiwi-bird"></i></div><span>SABUNG AYAM</span></div>
+                <div class="category-item" onclick="bukaGame('TEMBAK_IKAN')"><div class="cat-icon"><i class="fas fa-fish"></i></div><span>TEMBAK IKAN</span></div>
+                <div class="category-item" onclick="bukaGame('LOTRE')"><div class="badge-tag new">NEW</div><div class="cat-icon"><i class="fas fa-dice-d20"></i></div><span>LOTRE</span></div>
+                <div class="category-item" onclick="bukaGame('E_GAMES')"><div class="cat-icon"><i class="fas fa-gamepad"></i></div><span>E-GAMES</span></div>
             </section>
 
             <section class="stat-card">
@@ -665,6 +666,21 @@
                     <button type="button" class="login-btn" id="btnChangePassword" style="margin-top: 10px; background: #7b2cbf;">Simpan Perubahan</button>
                 </div>
             </div>
+        </div>
+
+        <!-- =========================================
+             HALAMAN GAME (IFRAME) - TAMBAHAN BARU
+             ========================================= -->
+        <div id="gameView" class="page-view" style="padding: 0; background: #000; height: 100vh; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; display: none;">
+            <!-- Tombol Keluar Game -->
+            <div style="position: absolute; top: 15px; left: 15px; z-index: 10000;">
+                <button onclick="closeGame()" style="background: #ff3333; color: white; padding: 10px 15px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-times"></i> TUTUP GAME
+                </button>
+            </div>
+            
+            <!-- Bingkai Game -->
+            <iframe id="gameIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
 
         <!-- =========================================
