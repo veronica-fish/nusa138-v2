@@ -2,7 +2,6 @@
 // BAGIAN 1: LOBI GAME (SOFTAGGREGATOR)
 // ============================================================
 
-// 1. Tampilkan Daftar Provider
 window.loadLobby = async function() {
     document.getElementById('providerSection').style.display = 'block';
     document.getElementById('gameSection').style.display = 'none';
@@ -11,11 +10,22 @@ window.loadLobby = async function() {
     providerGrid.innerHTML = '<p style="color: gray; grid-column: span 3; text-align: center;">Memuat provider...</p>';
 
     try {
-        const response = await fetch(`https://nusa138.wispbyte.app/api/providers`);
-        const data = await response.json();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+        const response = await fetch(`https://nusa138.wispbyte.app/api/providers`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        const data = await response.json();
         if (data.error) throw new Error(data.error);
+
         providerGrid.innerHTML = ''; 
+
+        if (!data.providers || data.providers.length === 0) {
+            providerGrid.innerHTML = '<p style="color: gray; grid-column: span 3; text-align: center;">Tidak ada provider tersedia.</p>';
+            return;
+        }
 
         data.providers.forEach(prov => {
             const card = document.createElement('div');
@@ -31,11 +41,11 @@ window.loadLobby = async function() {
             providerGrid.appendChild(card);
         });
     } catch (err) {
-        providerGrid.innerHTML = '<p style="color: red; grid-column: span 3; text-align: center;">Gagal memuat provider.</p>';
+        console.error("Gagal load provider:", err);
+        providerGrid.innerHTML = '<p style="color: red; grid-column: span 3; text-align: center;">Gagal memuat provider. Server Wispbyte mungkin sedang sibuk atau mati.</p>';
     }
 };
 
-// 2. Tampilkan Game dari Provider yang Dipilih
 window.loadProviderGames = async function(providerCode, providerName) {
     document.getElementById('providerSection').style.display = 'none';
     document.getElementById('gameSection').style.display = 'block';
@@ -71,19 +81,16 @@ window.loadProviderGames = async function(providerCode, providerName) {
             card.onclick = () => window.bukaGame(game.id_hash);
             gameGrid.appendChild(card);
         });
-
     } catch (err) {
         gameGrid.innerHTML = '<p style="color: red; grid-column: span 3; text-align: center;">Gagal memuat daftar game.</p>';
     }
 };
 
-// 3. Kembali ke Provider
 window.backToProviders = function() {
     document.getElementById('gameSection').style.display = 'none';
     document.getElementById('providerSection').style.display = 'block';
 };
 
-// 4. Buka Game Spesifik
 window.bukaGame = async function(idHash) {
     if (typeof currentSession === 'undefined' || !currentSession || !currentSession.user) {
         alert("Silakan login terlebih dahulu!");
@@ -115,6 +122,7 @@ window.bukaGame = async function(idHash) {
     }
 };
 
+
 // ============================================================
 // BAGIAN 2: WITHDRAW & FORMAT ANGKA (ANTI-HACK RPC)
 // ============================================================
@@ -122,14 +130,16 @@ document.body.addEventListener('input', function (e) {
     if (e.target.id !== 'withdrawAmount') return;
     let value = e.target.value.replace(/[^0-9]/g, '');
     if (value) { e.target.value = parseInt(value, 10).toLocaleString('en-US'); } else { e.target.value = ''; }
-    document.getElementById('withdrawErrorMsg').style.display = 'none';
+    const errMsg = document.getElementById('withdrawErrorMsg');
+    if (errMsg) errMsg.style.display = 'none';
     e.target.style.borderColor = '#555';
 });
 
 document.body.addEventListener('change', function (e) {
     if (e.target.id !== 'withdrawBankSelect') return;
     e.target.style.borderColor = '#555';
-    document.getElementById('withdrawErrorMsg').style.display = 'none';
+    const errMsg = document.getElementById('withdrawErrorMsg');
+    if (errMsg) errMsg.style.display = 'none';
     const opt = e.target.options[e.target.selectedIndex];
     const nameEl = document.getElementById('withdrawAccountName');
     if (nameEl && opt && opt.dataset.accountName) nameEl.value = opt.dataset.accountName;
@@ -198,8 +208,9 @@ document.body.addEventListener('click', async function (e) {
     }
 });
 
+
 // ============================================================
-// BAGIAN 3: LOGIKA UI LAINNYA (ROUTING, DEPOSIT, DLL)
+// BAGIAN 3: LOGIKA UI LAINNYA
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof supabaseClient === 'undefined') return;
@@ -207,6 +218,10 @@ document.addEventListener('DOMContentLoaded', () => {
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (typeof checkAuthState === 'function') checkAuthState(session);
         if (typeof handleRouting === 'function') handleRouting();
+    });
+    
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+        if (typeof checkAuthState === 'function') checkAuthState(session);
     });
 
     const routes = {
@@ -234,6 +249,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetViewId === 'lobbyView' && typeof loadLobby === 'function') loadLobby();
 
             if (pushState) history.pushState({ path: path }, '', path);
+            
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
+            if (targetViewId === 'homeView') document.getElementById('navHome')?.classList.add('active');
+            if (targetViewId === 'depositView') document.getElementById('danaBtn')?.classList.add('active');
+
             hideLoading();
         }, 300);
     };
@@ -246,24 +266,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (link) { e.preventDefault(); navigateTo(link.getAttribute('href'), true); }
     });
 
-    // Login
+    const headerUserBtn = document.getElementById('headerUserBtn');
+    if (headerUserBtn) {
+        headerUserBtn.addEventListener('click', () => {
+            if (currentSession) openProfilePanel();
+            else openLoginPanel();
+        });
+    }
+
+    // Banner Slider
+    const track = document.getElementById('bannerTrack');
+    if (track) {
+        let currentIndex = 0;
+        setInterval(() => {
+            currentIndex = (currentIndex + 1) % 3;
+            track.style.transform = `translateX(${currentIndex * -33.3333}%)`;
+        }, 5000);
+    }
+
+    // Live Transaksi
+    const transTrack = document.getElementById('transTrack');
+    if (transTrack) {
+        let transIndex = 0;
+        setInterval(() => {
+            transIndex = (transIndex + 1) % 3;
+            transTrack.style.transform = `translateX(calc(-${transIndex * 50}% - ${transIndex * 6}px))`;
+        }, 4000);
+    }
+
+    // Login Form (Jika Anda punya logikanya di auth.js, biarkan. Ini backup jika tidak ada)
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
-            const usernameOrEmail = document.getElementById('loginEmail').value.trim();
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
-            if (!usernameOrEmail || !password) return alert("Isi data login!");
-
+            if (!email || !password) return alert("Isi email dan password!");
             btnLogin.innerText = "MEMPROSES...";
-            let emailToLogin = usernameOrEmail;
-            if (!usernameOrEmail.includes('@')) {
-                const { data: profileData } = await supabaseClient.from('profiles').select('email').eq('username', usernameOrEmail).single();
-                if (!profileData) { alert("Username tidak ada!"); btnLogin.innerText = "Login"; return; }
-                emailToLogin = profileData.email;
-            }
-            const { error } = await supabaseClient.auth.signInWithPassword({ email: emailToLogin, password });
-            if (error) { alert("Login Gagal."); btnLogin.innerText = "Login"; } 
-            else { alert("Login Berhasil!"); btnLogin.innerText = "Login"; }
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) alert("Login Gagal: " + error.message);
+            else alert("Login Berhasil!");
+            btnLogin.innerText = "Login";
         });
     }
 
@@ -285,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (profile.bank_name) {
                 const opt = document.createElement('option');
                 opt.value = profile.bank_name;
-                opt.text = `${profile.bank_name} (****${profile.account_number.slice(-4)})`;
+                opt.text = `${profile.bank_name} (****${profile.account_number?.slice(-4) || ''})`;
                 opt.dataset.bankName = profile.bank_name;
                 opt.dataset.accountNumber = profile.account_number;
                 opt.dataset.accountName = profile.account_name;
@@ -325,13 +367,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Tabs Deposit
     document.querySelectorAll('.deposit-tab').forEach(tab => {
         tab.addEventListener('click', function () {
             document.querySelectorAll('.deposit-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.deposit-pane').forEach(p => p.classList.remove('active'));
             this.classList.add('active');
             document.getElementById(this.getAttribute('data-target'))?.classList.add('active');
+        });
+    });
+
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', function () {
+            const answer = this.nextElementSibling;
+            const icon = this.querySelector('i');
+            if (!answer || !icon) return;
+            if (answer.style.maxHeight) {
+                answer.style.maxHeight = null;
+                icon.classList.replace('fa-minus', 'fa-plus');
+            } else {
+                document.querySelectorAll('.faq-answer').forEach(ans => ans.style.maxHeight = null);
+                document.querySelectorAll('.faq-question i').forEach(ic => ic.classList.replace('fa-minus', 'fa-plus'));
+                answer.style.maxHeight = answer.scrollHeight + "px";
+                icon.classList.replace('fa-plus', 'fa-minus');
+            }
         });
     });
 });
