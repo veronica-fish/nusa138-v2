@@ -1,5 +1,53 @@
 // ============================================================
-// BAGIAN 1: KONFIGURASI & ROUTING (URL BERTINGKAT)
+// BAGIAN 1: ROUTING HASH (#)
+// ============================================================
+window.navigateTo = function (path, pushState = true) {
+    if (typeof showLoading === 'function') showLoading();
+    
+    if (pushState) {
+        if (window.location.hash !== '#' + path) window.location.hash = path;
+    }
+    
+    document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+    const parts = path.split('/').filter(p => p !== '');
+    const mainRoute = parts[0] || 'home';
+
+    if (mainRoute === 'home' || mainRoute === '') {
+        document.getElementById('homeView')?.classList.add('active');
+        document.getElementById('navHome')?.classList.add('active');
+    } 
+    else if (mainRoute === 'login') {
+        document.getElementById('homeView')?.classList.add('active');
+        if (typeof openLoginPanel === 'function') openLoginPanel();
+    }
+    else if (mainRoute === 'deposit') {
+        document.getElementById('depositView')?.classList.add('active');
+        document.getElementById('danaBtn')?.classList.add('active');
+        if (typeof openDepositView === 'function') openDepositView();
+    }
+    else if (['slots', 'live', 'sportsbook', 'fishing', 'other'].includes(mainRoute)) {
+        document.getElementById('lobbyView')?.classList.add('active');
+        window.currentCategory = mainRoute;
+        if (parts.length === 1) { if (typeof loadLobby === 'function') loadLobby(); }
+        else if (parts.length === 2) { if (typeof loadProviderGamesByURL === 'function') loadProviderGamesByURL(mainRoute, parts[1]); }
+        else if (parts.length === 3) { if (typeof loadGameByURL === 'function') loadGameByURL(mainRoute, parts[1], parts[2]); }
+    }
+    else {
+        const viewId = mainRoute + 'View';
+        document.getElementById(viewId)?.classList.add('active');
+    }
+
+    window.scrollTo(0, 0);
+    if (typeof hideLoading === 'function') hideLoading();
+};
+
+window.handleRouting = function () { 
+    let path = window.location.hash.replace('#', '') || '/home';
+    navigateTo(path, false); 
+};
+
+// ============================================================
+// BAGIAN 2: LOBI GAME, SORTIR POPULER & PENCARIAN
 // ============================================================
 const POPULAR_PROVIDERS = ['pgsoft', 'pragmaticplay', 'evolution', 'joker', 'cq9', 'habanero', 'playtech'];
 const POPULAR_GAMES = ['mahjong', 'gates of olympus', 'fortune', 'sweet bonanza', 'starlight', 'aztec', 'wild bandito', 'olympus'];
@@ -12,62 +60,6 @@ window.currentGamesData = [];
 window.currentGameIndex = 0;
 window.gamesPerPage = 30;
 
-window.navigateTo = function (path, pushState = true) {
-    if (typeof showLoading === 'function') showLoading();
-    if (pushState) history.pushState({ path: path }, '', path);
-    
-    document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
-    
-    const parts = path.split('/').filter(p => p !== '');
-    const mainRoute = parts[0] || 'home';
-
-    // 1. HOME
-    if (mainRoute === 'home' || mainRoute === '') {
-        document.getElementById('homeView')?.classList.add('active');
-        document.getElementById('navHome')?.classList.add('active');
-    } 
-    // 2. LOGIN
-    else if (mainRoute === 'login') {
-        document.getElementById('homeView')?.classList.add('active');
-        if (typeof openLoginPanel === 'function') openLoginPanel();
-    }
-    // 3. DEPOSIT
-    else if (mainRoute === 'deposit') {
-        document.getElementById('depositView')?.classList.add('active');
-        document.getElementById('danaBtn')?.classList.add('active');
-        if (typeof openDepositView === 'function') openDepositView();
-    }
-    // 4. LOBI GAME
-    else if (['slots', 'live', 'sportsbook', 'fishing', 'other'].includes(mainRoute)) {
-        document.getElementById('lobbyView')?.classList.add('active');
-        window.currentCategory = mainRoute;
-        
-        if (parts.length === 1) {
-            if (typeof loadLobby === 'function') loadLobby();
-        } else if (parts.length === 2) {
-            if (typeof loadProviderGamesByURL === 'function') loadProviderGamesByURL(mainRoute, parts[1]);
-        } else if (parts.length === 3) {
-            if (typeof loadGameByURL === 'function') loadGameByURL(mainRoute, parts[1], parts[2]);
-        }
-    }
-    // 5. HALAMAN LAIN
-    else {
-        const viewId = mainRoute + 'View';
-        document.getElementById(viewId)?.classList.add('active');
-    }
-
-    window.scrollTo(0, 0);
-    if (typeof hideLoading === 'function') hideLoading();
-};
-
-window.handleRouting = function () { 
-    navigateTo(window.location.pathname, false); 
-};
-
-
-// ============================================================
-// BAGIAN 2: FUNGSI LOBI & PROVIDER
-// ============================================================
 window.loadLobby = async function() {
     document.getElementById('providerSection').style.display = 'block';
     document.getElementById('gameSection').style.display = 'none';
@@ -112,7 +104,6 @@ window.loadLobby = async function() {
 window.renderProviders = function(providersList) {
     const providerGrid = document.getElementById('providerGrid');
     providerGrid.innerHTML = ''; 
-
     if (providersList.length === 0) {
         providerGrid.innerHTML = `<p style="color: gray; grid-column: span 3; text-align: center;">Provider tidak ditemukan.</p>`;
         return;
@@ -135,7 +126,6 @@ window.renderProviders = function(providersList) {
 
 window.loadProviderGamesByURL = async function(category, providerCode) {
     if (window.allGamesData.length === 0) await window.loadLobby();
-    
     document.getElementById('providerSection').style.display = 'none';
     document.getElementById('gameSection').style.display = 'block';
     document.getElementById('searchLobbyInput').placeholder = "Cari Game...";
@@ -157,13 +147,21 @@ window.loadProviderGamesByURL = async function(category, providerCode) {
     window.renderGames();
 };
 
+window.loadGameByURL = async function(category, providerCode, gameSlug) {
+    if (window.allGamesData.length === 0) await window.loadLobby();
+    await window.loadProviderGamesByURL(category, providerCode);
+    
+    const gameData = window.allGamesData.find(g => g.id_hash.replace(/[^a-zA-Z0-9]/g, '-') === gameSlug);
+    if (gameData) window.executeBukaGame(gameData.id_hash);
+    else { alert("Game tidak ditemukan."); window.navigateTo(`/${category}/${providerCode}`, true); }
+};
+
 window.renderGames = function() {
     const gameGrid = document.getElementById('gameGrid');
     if (window.currentGameIndex === 0) {
         gameGrid.innerHTML = '';
         document.getElementById('btnLoadMoreGames')?.remove();
     }
-
     if (window.currentGamesData.length === 0) {
         gameGrid.innerHTML = '<p style="color: gray; grid-column: span 3; text-align: center;">Game tidak ditemukan.</p>';
         return;
@@ -183,7 +181,6 @@ window.renderGames = function() {
             <div style="padding: 6px 4px; font-size: 10px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${game.name}</div>
         `;
         
-        // KLIK GAME: Ubah URL ke /kategori/provider/game-slug
         card.onclick = () => {
             const slug = game.id_hash.replace(/[^a-zA-Z0-9]/g, '-');
             window.navigateTo(`/${window.currentCategory}/${game.provider}/${slug}`, true);
@@ -207,11 +204,8 @@ window.renderGames = function() {
     } else { if (btnLoadMore) btnLoadMore.style.display = 'none'; }
 };
 
-window.backToProviders = function() {
-    window.navigateTo(`/${window.currentCategory}`, true);
-};
+window.backToProviders = function() { window.navigateTo(`/${window.currentCategory}`, true); };
 
-// LOGIKA PENCARIAN
 document.getElementById('searchLobbyInput')?.addEventListener('input', function(e) {
     const keyword = e.target.value.toLowerCase();
     if (document.getElementById('providerSection').style.display === 'block') {
@@ -225,7 +219,6 @@ document.getElementById('searchLobbyInput')?.addEventListener('input', function(
     }
 });
 
-// EKSEKUSI BUKA GAME (Hit API Wispbyte)
 window.executeBukaGame = async function(idHash) {
     if (typeof currentSession === 'undefined' || !currentSession || !currentSession.user) {
         alert("Silakan login terlebih dahulu!"); window.navigateTo('/login', true); return;
@@ -249,9 +242,8 @@ window.executeBukaGame = async function(idHash) {
     }
 };
 
-
 // ============================================================
-// BAGIAN 3: WITHDRAW, DEPOSIT, & UI LAINNYA
+// BAGIAN 3: WITHDRAW (ANTI-HACK RPC)
 // ============================================================
 document.body.addEventListener('input', function (e) {
     if (e.target.id !== 'withdrawAmount') return;
@@ -321,7 +313,9 @@ document.body.addEventListener('click', async function (e) {
     }
 });
 
-
+// ============================================================
+// BAGIAN 4: UI LAINNYA (ANIMASI & INIT)
+// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof supabaseClient === 'undefined') return;
 
@@ -336,7 +330,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.showLoading = function () { document.getElementById('loadingOverlay')?.classList.add('active'); };
     window.hideLoading = function () { document.getElementById('loadingOverlay')?.classList.remove('active'); };
-    window.addEventListener('popstate', () => window.handleRouting());
+    
+    window.addEventListener('hashchange', () => window.handleRouting());
 
     const headerUserBtn = document.getElementById('headerUserBtn');
     if (headerUserBtn) {
@@ -352,14 +347,55 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(() => { currentIndex = (currentIndex + 1) % 3; track.style.transform = `translateX(${currentIndex * -33.3333}%)`; }, 5000);
     }
 
-    // Live Transaksi
+    // Live Transaksi Palsu (Dikembalikan)
     const transTrack = document.getElementById('transTrack');
+    const transDots = document.querySelectorAll('.t-dot');
     if (transTrack) {
-        let transIndex = 0;
-        setInterval(() => { transIndex = (transIndex + 1) % 3; transTrack.style.transform = `translateX(calc(-${transIndex * 50}% - ${transIndex * 6}px))`; }, 4000);
+        let transIndex = 0; let transInterval; const totalTransCards = 4; const totalPages = 3;
+
+        function formatRupiah(amount) {
+            let formatted = (amount / 1000).toFixed(2); let parts = formatted.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return "IDR " + parts.join('.');
+        }
+        function generateRandomData() {
+            const prefixes = ['DEW', 'SIG', 'ABD', 'BUD', 'AGU', 'RIN', 'JOK', 'BAM', 'SUP', 'ADI', 'DEN', 'PUT', 'WAY', 'KOM'];
+            const maskedName = prefixes[Math.floor(Math.random() * prefixes.length)] + '*'.repeat(Math.floor(Math.random() * 7) + 4);
+            let amountK; const rand = Math.random();
+            if (rand < 0.8) amountK = Math.floor(Math.random() * 451) + 50;
+            else { if (Math.random() > 0.5) amountK = Math.floor(Math.random() * 40) + 10; else amountK = Math.floor(Math.random() * 9500) + 501; }
+            const type = Math.random() > 0.5 ? 'DEPOSIT' : 'WITHDRAW';
+            const now = new Date(); now.setMinutes(now.getMinutes() - Math.floor(Math.random() * 60)); 
+            const formattedDate = `${type}, ${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            return { name: maskedName, amount: formatRupiah(amountK * 1000), date: formattedDate };
+        }
+        function populateCards() {
+            for (let i = 1; i <= totalTransCards; i++) {
+                const data = generateRandomData();
+                const nameEl = document.getElementById(`name${i}`);
+                const amountEl = document.getElementById(`amount${i}`);
+                const typeEl = document.getElementById(`type${i}`);
+                if (nameEl) nameEl.innerText = data.name;
+                if (amountEl) amountEl.innerText = data.amount;
+                if (typeEl) typeEl.innerText = data.date;
+            }
+        }
+        function goToTransSlide(index) {
+            transTrack.style.transform = `translateX(calc(-${index * 50}% - ${index * 6}px))`;
+            transDots.forEach(dot => dot.classList.remove('active'));
+            if (transDots[index]) transDots[index].classList.add('active');
+        }
+        function startTransSlider() {
+            clearInterval(transInterval);
+            transInterval = setInterval(() => {
+                transIndex++;
+                if (transIndex >= totalPages) { transIndex = 0; populateCards(); }
+                goToTransSlide(transIndex);
+            }, 4000);
+        }
+        populateCards(); startTransSlider();
     }
 
-    // Login
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
@@ -374,10 +410,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Deposit
     window.openDepositView = async function () {
         if (!currentSession) { window.navigateTo('/login', true); return; }
-        
         document.getElementById('formInputArea').style.display = 'block';
         document.getElementById('qrisArea').style.display = 'none';
 
