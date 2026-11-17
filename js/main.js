@@ -1,4 +1,39 @@
 // ============================================================
+// BAGIAN 0: FUNGSI AUTO SCROLL UNTUK GAMES
+// ============================================================
+function startAutoScroll(trackId, speed = 1) {
+    const track = document.getElementById(trackId);
+    if (!track) return;
+
+    let isHovered = false;
+    let animationFrameId;
+
+    // Pause saat mouse diarahkan ke gambar (Desktop)
+    track.addEventListener('mouseenter', () => isHovered = true);
+    track.addEventListener('mouseleave', () => isHovered = false);
+    
+    // Pause saat layar disentuh (Mobile)
+    track.addEventListener('touchstart', () => isHovered = true, { passive: true });
+    track.addEventListener('touchend', () => isHovered = false, { passive: true });
+
+    function scrollStep() {
+        if (!isHovered && track.scrollWidth > track.clientWidth) {
+            track.scrollLeft += speed;
+
+            // Jika sudah mentok di paling kanan, kembalikan ke paling kiri
+            if (track.scrollLeft >= (track.scrollWidth - track.clientWidth - 1)) {
+                setTimeout(() => {
+                    if(!isHovered) track.scrollLeft = 0;
+                }, 1000); 
+            }
+        }
+        animationFrameId = requestAnimationFrame(scrollStep);
+    }
+    animationFrameId = requestAnimationFrame(scrollStep);
+}
+
+
+// ============================================================
 // BAGIAN 1: ROUTING HASH (#) & TRANSISI LOADING
 // ============================================================
 window.navigateTo = function (path, pushState = true) {
@@ -7,7 +42,6 @@ window.navigateTo = function (path, pushState = true) {
         path = '/home'; 
     }
 
-    // Tampilkan Loading Overlay
     if (typeof showLoading === 'function') showLoading();
     
     if (pushState) {
@@ -16,13 +50,12 @@ window.navigateTo = function (path, pushState = true) {
         }
     }
     
-    // DURASI DIPERLAMA MENJADI 800ms AGAR LEBIH TERASA
+    // Jeda 800ms agar efek loading terlihat
     setTimeout(() => {
         document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
         const parts = path.split('/').filter(p => p !== '');
         const mainRoute = parts[0] || 'home';
 
-        // Logika Halaman
         if (mainRoute === 'home' || mainRoute === '') {
             document.getElementById('homeView')?.classList.add('active');
             document.getElementById('navHome')?.classList.add('active');
@@ -56,7 +89,6 @@ window.navigateTo = function (path, pushState = true) {
 
         window.scrollTo(0, 0);
         
-        // Sembunyikan Loading Overlay setelah halaman selesai berubah
         if (typeof hideLoading === 'function') hideLoading();
     }, 800); 
 };
@@ -475,10 +507,83 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.deposit-pane').forEach(p => p.classList.remove('active'));
                 this.classList.add('active');
                 document.getElementById(targetId)?.classList.add('active');
+                
+                // JIKA YANG DIKLIK ADALAH RIWAYAT, MUAT DATANYA
+                if (targetId === 'transHistory') {
+                    window.loadTransactionHistory();
+                }
+
                 if (typeof hideLoading === 'function') hideLoading();
             }, 500);
         });
     });
+
+    // FUNGSI RIWAYAT TRANSAKSI
+    window.loadTransactionHistory = async function() {
+        const container = document.getElementById('transactionListContainer');
+        if (!container) return;
+        
+        if (!currentSession || !currentSession.user) {
+            container.innerHTML = '<p style="text-align: center; color: #aaa;">Silakan login untuk melihat riwayat.</p>';
+            return;
+        }
+
+        container.innerHTML = '<p style="text-align: center; color: #aaa;">Memuat riwayat...</p>';
+
+        try {
+            const { data: transactions, error } = await supabaseClient
+                .from('transactions')
+                .select('*')
+                .eq('user_id', currentSession.user.id)
+                .in('type', ['DEPOSIT', 'WITHDRAW'])
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            if (error) throw error;
+
+            if (!transactions || transactions.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #aaa;">Belum ada riwayat Deposit atau Withdraw.</p>';
+                return;
+            }
+
+            container.innerHTML = ''; 
+
+            transactions.forEach(tx => {
+                let color = '#fff';
+                let sign = '';
+                
+                if (tx.type === 'DEPOSIT') {
+                    color = '#4ade80';
+                    sign = '+';
+                } else if (tx.type === 'WITHDRAW') {
+                    color = '#f87171';
+                    sign = '-';
+                }
+
+                const date = new Date(tx.created_at);
+                const dateStr = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const amountStr = parseInt(tx.amount).toLocaleString('id-ID');
+
+                const item = document.createElement('div');
+                item.style.cssText = "background: #1f1f1f; border: 1px solid #333; border-radius: 8px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;";
+                item.innerHTML = `
+                    <div>
+                        <div style="color: #fff; font-weight: bold; font-size: 14px;">${tx.type}</div>
+                        <div style="color: #888; font-size: 11px;">${dateStr}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: ${color}; font-weight: bold; font-size: 15px;">${sign} Rp ${amountStr}</div>
+                        <div style="color: #888; font-size: 11px;">Status: ${tx.status || 'SUCCESS'}</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+        } catch (err) {
+            console.error("Gagal memuat riwayat:", err);
+            container.innerHTML = '<p style="text-align: center; color: #ff3333;">Gagal memuat riwayat.</p>';
+        }
+    };
 
     // Banner Slider
     const track = document.getElementById('bannerTrack');
@@ -654,9 +759,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ============================================================
     // LOGIKA TOMBOL REFRESH SALDO
-    // ============================================================
     const refreshBtn = document.querySelector('.refresh-btn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', async () => {
@@ -689,4 +792,78 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ============================================================
+    // FUNGSI UNTUK MENAMPILKAN POPULAR & NEW GAMES DI BERANDA (AUTO SCROLL)
+    // ============================================================
+    async function loadHomeGames() {
+        const popTrack = document.getElementById('popularGamesTrack');
+        const newTrack = document.getElementById('newGamesTrack');
+        
+        if (!popTrack || !newTrack) return;
+
+        try {
+            const response = await fetch(`https://nusa138.wispbyte.app/api/games`);
+            const data = await response.json();
+            
+            if (data.error) throw new Error(data.error);
+            const games = data.games || [];
+
+            const topProviders = ['pgsoft', 'pragmaticplay', 'spadegaming', 'joker', 'habanero', 'cq9', 'playtech'];
+
+            // 1. FILTER POPULAR GAMES
+            let popularGames = games.filter(g => g.status === 1 && topProviders.includes(g.provider.toLowerCase()));
+            popularGames = popularGames.sort(() => 0.5 - Math.random()).slice(0, 15);
+
+            // 2. FILTER NEW GAMES
+            let newGames = games.filter(g => g.status === 1 && g.image);
+            newGames = newGames.sort(() => 0.5 - Math.random()).slice(0, 15);
+
+            // --- RENDER POPULAR GAMES ---
+            popTrack.innerHTML = '';
+            if (popularGames.length > 0) {
+                popularGames.forEach(game => {
+                    const card = document.createElement('div');
+                    card.className = 'home-game-card';
+                    card.innerHTML = `
+                        <img src="${game.image || 'https://via.placeholder.com/100'}" alt="${game.name}">
+                        <span>${game.name}</span>
+                    `;
+                    card.onclick = () => window.executeBukaGame(game.id_hash);
+                    popTrack.appendChild(card);
+                });
+                // Mulai Auto Scroll Popular
+                startAutoScroll('popularGamesTrack', 1.5);
+            } else {
+                popTrack.innerHTML = '<p style="color: #888; font-size: 12px; text-align: center; width: 100%;">Game tidak ditemukan.</p>';
+            }
+
+            // --- RENDER NEW GAMES ---
+            newTrack.innerHTML = '';
+            if (newGames.length > 0) {
+                newGames.forEach(game => {
+                    const card = document.createElement('div');
+                    card.className = 'home-game-card';
+                    card.innerHTML = `
+                        <img src="${game.image || 'https://via.placeholder.com/100'}" alt="${game.name}">
+                        <span>${game.name}</span>
+                    `;
+                    card.onclick = () => window.executeBukaGame(game.id_hash);
+                    newTrack.appendChild(card);
+                });
+                // Mulai Auto Scroll New
+                startAutoScroll('newGamesTrack', 1.5);
+            } else {
+                newTrack.innerHTML = '<p style="color: #888; font-size: 12px; text-align: center; width: 100%;">Game tidak ditemukan.</p>';
+            }
+
+        } catch (err) {
+            console.error("Gagal memuat game beranda:", err);
+            if(popTrack) popTrack.innerHTML = '<p style="color: red; font-size: 12px; text-align: center; width: 100%;">Gagal memuat.</p>';
+            if(newTrack) newTrack.innerHTML = '<p style="color: red; font-size: 12px; text-align: center; width: 100%;">Gagal memuat.</p>';
+        }
+    }
+
+    // Panggil fungsi memuat game saat halaman siap
+    loadHomeGames();
 });
