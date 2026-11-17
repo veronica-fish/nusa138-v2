@@ -30,6 +30,49 @@
         .talksilo-launcher { 
             display: none !important; 
         }
+
+        /* CSS UNTUK AUTO-SCROLL GAMES */
+        .home-games-track {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 0 15px 15px 15px;
+            scrollbar-width: none; 
+            scroll-behavior: auto;
+        }
+        .home-games-track::-webkit-scrollbar { display: none; }
+        .home-game-card {
+            flex: 0 0 100px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .home-game-card img {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+            border: 1px solid #333;
+        }
+        .home-game-card:hover img {
+            transform: scale(1.05);
+            border-color: #a855f7;
+        }
+        .home-game-card span {
+            color: white;
+            font-size: 11px;
+            text-align: center;
+            margin-top: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -101,6 +144,14 @@
                 <button class="auth-tab-btn daftar-tab" onclick="openRegisterView()">DAFTAR</button>
             </div>
 
+            <!-- POPULAR GAMES SECTION -->
+            <section class="home-games-section" style="margin-top: 20px;">
+                <h2 style="text-align: center; color: #fff; font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">Popular Games</h2>
+                <div class="home-games-track" id="popularGamesTrack">
+                    <p style="color: #888; font-size: 12px; text-align: center; width: 100%;">Memuat game populer...</p>
+                </div>
+            </section>
+
             <section class="category-grid">
                 <div class="category-item" onclick="navigateTo('/slots', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-dice"></i></div><span>SLOTS</span></div>
                 <div class="category-item" onclick="navigateTo('/live', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-tv"></i></div><span>LIVE GAMES</span></div>
@@ -128,6 +179,14 @@
                     </select>
                 </div>
                 <div class="server-status">Status: Belum terhubung ke server</div>
+            </section>
+
+            <!-- NEW GAMES SECTION -->
+            <section class="home-games-section" style="margin-top: 20px;">
+                <h2 style="text-align: center; color: #fff; font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">New Games</h2>
+                <div class="home-games-track" id="newGamesTrack">
+                    <p style="color: #888; font-size: 12px; text-align: center; width: 100%;">Memuat game terbaru...</p>
+                </div>
             </section>
 
             <section class="live-transaction-section">
@@ -359,7 +418,14 @@
                 </div>
             </div>
             
-            <div id="transHistory" class="deposit-pane"><div class="deposit-card" style="text-align: center; padding: 40px 20px;"><h3>5 Transaksi Terakhir</h3><p>Belum ada riwayat.</p></div></div>
+            <div id="transHistory" class="deposit-pane">
+                <div class="deposit-card" style="padding: 20px; background: transparent; border: none;">
+                    <h3 style="text-align: center; color: #fff; margin-bottom: 20px;">5 Transaksi Terakhir</h3>
+                    <div id="transactionListContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                        <p style="text-align: center; color: #aaa;">Memuat riwayat...</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- =========================================
@@ -616,8 +682,6 @@
             <a href="#/promo" data-link class="nav-item" id="navPromo"><i class="fas fa-gift nav-icon"></i><span>PROMO SAYA</span></a>
             <a href="#/deposit" data-link class="nav-item dana-nav-item" id="danaBtn"><div class="dana-icon-wrapper"><i class="fas fa-wallet nav-icon"></i></div><span>DANA</span></a>
             <a href="#/memo" data-link class="nav-item" id="navMemo"><i class="far fa-envelope nav-icon"></i><span>MEMO</span></a>
-            
-            <!-- Tombol Live Chat diubah ke javascript:void(0) -->
             <a href="javascript:void(0)" class="nav-item" id="navLiveChat"><i class="far fa-comment-dots nav-icon"></i><span>LIVE CHAT</span></a>
         </nav>
 
