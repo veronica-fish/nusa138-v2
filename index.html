@@ -144,14 +144,6 @@
                 <button class="auth-tab-btn daftar-tab" onclick="openRegisterView()">DAFTAR</button>
             </div>
 
-            <!-- POPULAR GAMES SECTION -->
-            <section class="home-games-section" style="margin-top: 20px;">
-                <h2 style="text-align: center; color: #fff; font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">Popular Games</h2>
-                <div class="home-games-track" id="popularGamesTrack">
-                    <p style="color: #888; font-size: 12px; text-align: center; width: 100%;">Memuat game populer...</p>
-                </div>
-            </section>
-
             <section class="category-grid">
                 <div class="category-item" onclick="navigateTo('/slots', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-dice"></i></div><span>SLOTS</span></div>
                 <div class="category-item" onclick="navigateTo('/live', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-tv"></i></div><span>LIVE GAMES</span></div>
@@ -164,8 +156,17 @@
                 <div class="category-item" onclick="navigateTo('/other', true)"><div class="cat-icon"><i class="fas fa-gamepad"></i></div><span>E-GAMES</span></div>
             </section>
 
+            <!-- JACKPOT SECTION -->
             <section class="stat-card">
                 <div class="card-value">IDR 35.887.788.361.00</div>
+            </section>
+
+            <!-- POPULAR GAMES SECTION (Dipindah ke bawah Jackpot) -->
+            <section class="home-games-section" style="margin-top: 20px;">
+                <h2 style="text-align: center; color: #fff; font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">Popular Games</h2>
+                <div class="home-games-track" id="popularGamesTrack">
+                    <p style="color: #888; font-size: 12px; text-align: center; width: 100%;">Memuat game populer...</p>
+                </div>
             </section>
 
             <section class="server-selector-box">
@@ -181,7 +182,7 @@
                 <div class="server-status">Status: Belum terhubung ke server</div>
             </section>
 
-            <!-- NEW GAMES SECTION -->
+            <!-- NEW GAMES SECTION (Dipindah ke bawah Server Selector) -->
             <section class="home-games-section" style="margin-top: 20px;">
                 <h2 style="text-align: center; color: #fff; font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">New Games</h2>
                 <div class="home-games-track" id="newGamesTrack">
