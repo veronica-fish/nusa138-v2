@@ -8,19 +8,14 @@ function startAutoScroll(trackId, speed = 1) {
     let isHovered = false;
     let animationFrameId;
 
-    // Pause saat mouse diarahkan ke gambar (Desktop)
     track.addEventListener('mouseenter', () => isHovered = true);
     track.addEventListener('mouseleave', () => isHovered = false);
-    
-    // Pause saat layar disentuh (Mobile)
     track.addEventListener('touchstart', () => isHovered = true, { passive: true });
     track.addEventListener('touchend', () => isHovered = false, { passive: true });
 
     function scrollStep() {
         if (!isHovered && track.scrollWidth > track.clientWidth) {
             track.scrollLeft += speed;
-
-            // Jika sudah mentok di paling kanan, kembalikan ke paling kiri
             if (track.scrollLeft >= (track.scrollWidth - track.clientWidth - 1)) {
                 setTimeout(() => {
                     if(!isHovered) track.scrollLeft = 0;
@@ -50,7 +45,6 @@ window.navigateTo = function (path, pushState = true) {
         }
     }
     
-    // Jeda 800ms agar efek loading terlihat
     setTimeout(() => {
         document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
         const parts = path.split('/').filter(p => p !== '');
@@ -88,7 +82,6 @@ window.navigateTo = function (path, pushState = true) {
         }
 
         window.scrollTo(0, 0);
-        
         if (typeof hideLoading === 'function') hideLoading();
     }, 800); 
 };
@@ -508,7 +501,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.classList.add('active');
                 document.getElementById(targetId)?.classList.add('active');
                 
-                // JIKA YANG DIKLIK ADALAH RIWAYAT, MUAT DATANYA
                 if (targetId === 'transHistory') {
                     window.loadTransactionHistory();
                 }
@@ -794,7 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ============================================================
-    // FUNGSI UNTUK MENAMPILKAN POPULAR & NEW GAMES DI BERANDA (AUTO SCROLL)
+    // FUNGSI UNTUK MENAMPILKAN POPULAR & NEW GAMES DI BERANDA (DENGAN TIMEOUT)
     // ============================================================
     async function loadHomeGames() {
         const popTrack = document.getElementById('popularGamesTrack');
@@ -802,20 +794,23 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!popTrack || !newTrack) return;
 
+        // Siapkan controller untuk timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // Batas 10 detik
+
         try {
-            const response = await fetch(`https://nusa138.wispbyte.app/api/games`);
+            const response = await fetch(`https://nusa138.wispbyte.app/api/games`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
             const data = await response.json();
-            
             if (data.error) throw new Error(data.error);
             const games = data.games || [];
 
             const topProviders = ['pgsoft', 'pragmaticplay', 'spadegaming', 'joker', 'habanero', 'cq9', 'playtech'];
 
-            // 1. FILTER POPULAR GAMES
             let popularGames = games.filter(g => g.status === 1 && topProviders.includes(g.provider.toLowerCase()));
             popularGames = popularGames.sort(() => 0.5 - Math.random()).slice(0, 15);
 
-            // 2. FILTER NEW GAMES
             let newGames = games.filter(g => g.status === 1 && g.image);
             newGames = newGames.sort(() => 0.5 - Math.random()).slice(0, 15);
 
@@ -832,7 +827,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.onclick = () => window.executeBukaGame(game.id_hash);
                     popTrack.appendChild(card);
                 });
-                // Mulai Auto Scroll Popular
                 startAutoScroll('popularGamesTrack', 1.5);
             } else {
                 popTrack.innerHTML = '<p style="color: #888; font-size: 12px; text-align: center; width: 100%;">Game tidak ditemukan.</p>';
@@ -851,16 +845,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.onclick = () => window.executeBukaGame(game.id_hash);
                     newTrack.appendChild(card);
                 });
-                // Mulai Auto Scroll New
                 startAutoScroll('newGamesTrack', 1.5);
             } else {
                 newTrack.innerHTML = '<p style="color: #888; font-size: 12px; text-align: center; width: 100%;">Game tidak ditemukan.</p>';
             }
 
         } catch (err) {
+            clearTimeout(timeoutId);
             console.error("Gagal memuat game beranda:", err);
-            if(popTrack) popTrack.innerHTML = '<p style="color: red; font-size: 12px; text-align: center; width: 100%;">Gagal memuat.</p>';
-            if(newTrack) newTrack.innerHTML = '<p style="color: red; font-size: 12px; text-align: center; width: 100%;">Gagal memuat.</p>';
+            if(popTrack) popTrack.innerHTML = '<p style="color: #ff3333; font-size: 12px; text-align: center; width: 100%;">Gagal memuat. Server lambat.</p>';
+            if(newTrack) newTrack.innerHTML = '<p style="color: #ff3333; font-size: 12px; text-align: center; width: 100%;">Gagal memuat. Server lambat.</p>';
         }
     }
 
