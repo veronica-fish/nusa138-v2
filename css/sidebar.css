@@ -1,62 +1,7 @@
-/* OVERLAY GELAP DI BELAKANG MENU */
-.sidebar-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 2000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-.sidebar-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* KOTAK MENU SIDEBAR */
-.sidebar-menu {
-    position: fixed;
-    top: 0; left: -130px; /* Posisi awal tersembunyi di kiri */
-    width: 130px; /* Lebar sidebar dibuat ramping */
-    height: 100%;
-    background: #9d4edd; /* Warna ungu sesuai tema */
-    z-index: 2001;
-    transition: left 0.3s ease;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-}
-.sidebar-menu.active {
-    left: 0; /* Muncul ke layar */
-}
-
-/* ITEM / TOMBOL DI DALAM SIDEBAR */
-.sidebar-item {
-    display: flex;
-    flex-direction: column; /* KUNCI UTAMA: Ikon di atas, teks di bawah */
-    align-items: center;    /* Tengahkan secara horizontal */
-    justify-content: center;
-    text-align: center;
-    padding: 22px 8px;      /* Jarak atas-bawah yang lega */
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 11px;        /* Ukuran font teks */
-    font-weight: 500;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Garis pemisah antar menu */
-    cursor: pointer;
-    transition: background 0.2s;
-    line-height: 1.3;       /* Jarak antar baris jika teksnya panjang (seperti PENGADUAN MEMBER) */
-}
-
-/* Efek saat disentuh/diklik */
-.sidebar-item:hover, .sidebar-item:active {
-    background: rgba(0, 0, 0, 0.15);
-}
-
-/* PENGATURAN IKON */
-.sidebar-item i {
-    font-size: 24px;        /* Ukuran ikon */
-    margin-bottom: 10px;    /* Jarak antara ikon dan teks di bawahnya */
-    width: auto;
-}
+.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+.sidebar-overlay.active { opacity: 1; visibility: visible; }
+.sidebar-menu { position: fixed; top: 0; left: -130px; width: 130px; height: 100%; background: #9d4edd; z-index: 2001; transition: left 0.3s ease; overflow-y: auto; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
+.sidebar-menu.active { left: 0; }
+.sidebar-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 22px 8px; color: #ffffff; text-decoration: none; font-size: 11px; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer; transition: background 0.2s; line-height: 1.3; }
+.sidebar-item:hover, .sidebar-item:active { background: rgba(0, 0, 0, 0.15); }
+.sidebar-item i { font-size: 24px; margin-bottom: 10px; width: auto; }
