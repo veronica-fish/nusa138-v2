@@ -31,7 +31,7 @@
             display: none !important; 
         }
 
-        /* CSS UNTUK AUTO-SCROLL GAMES */
+        /* CSS UNTUK AUTO-SCROLL GAMES (POPULAR & NEW) */
         .home-games-track {
             display: flex;
             overflow-x: auto;
@@ -73,6 +73,19 @@
             width: 100%;
             font-weight: 500;
         }
+
+        /* CSS KATEGORI GESER (1 BARIS) */
+        .category-scroll-container {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 15px;
+            background: #b05de4;
+            scrollbar-width: none; /* Sembunyikan scrollbar Firefox */
+            -webkit-overflow-scrolling: touch;
+        }
+        .category-scroll-container::-webkit-scrollbar { display: none; } /* Sembunyikan scrollbar Chrome/Safari */
     </style>
 </head>
 <body>
@@ -144,16 +157,54 @@
                 <button class="auth-tab-btn daftar-tab" onclick="openRegisterView()">DAFTAR</button>
             </div>
 
-            <section class="category-grid">
-                <div class="category-item" onclick="navigateTo('/slots', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-dice"></i></div><span>SLOTS</span></div>
-                <div class="category-item" onclick="navigateTo('/live', true)"><div class="badge-tag hot">HOT</div><div class="cat-icon"><i class="fas fa-tv"></i></div><span>LIVE GAMES</span></div>
-                <div class="category-item" onclick="navigateTo('/sportsbook', true)"><div class="cat-icon"><i class="fas fa-futbol"></i></div><span>SPORTS</span></div>
-                <div class="category-item" onclick="navigateTo('/live', true)"><div class="cat-icon"><i class="fas fa-diamond"></i></div><span>CASINO</span></div>
-                <div class="category-item" onclick="navigateTo('/other', true)"><div class="cat-icon"><i class="fas fa-clone"></i></div><span>P2P</span></div>
-                <div class="category-item" onclick="navigateTo('/other', true)"><div class="cat-icon"><i class="fas fa-kiwi-bird"></i></div><span>SABUNG AYAM</span></div>
-                <div class="category-item" onclick="navigateTo('/fishing', true)"><div class="cat-icon"><i class="fas fa-fish"></i></div><span>TEMBAK IKAN</span></div>
-                <div class="category-item" onclick="navigateTo('/other', true)"><div class="badge-tag new">NEW</div><div class="cat-icon"><i class="fas fa-dice-d20"></i></div><span>LOTRE</span></div>
-                <div class="category-item" onclick="navigateTo('/other', true)"><div class="cat-icon"><i class="fas fa-gamepad"></i></div><span>E-GAMES</span></div>
+            <!-- KATEGORI GAME (1 Baris & Bisa Digeser) -->
+            <section class="category-scroll-container">
+                
+                <!-- 1. SLOTS -->
+                <div class="category-item" onclick="navigateTo('/slots', true)" style="flex: 0 0 auto; width: 85px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <img src="img/slots.png" alt="Slots" draggable="false" oncontextmenu="return false;" style="width: 100%; max-width: 85px; height: auto; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none;">
+                </div>
+
+                <!-- 2. LIVE GAMES -->
+                <div class="category-item" onclick="navigateTo('/live', true)" style="flex: 0 0 auto; width: 85px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <img src="img/livegames.png" alt="Live Games" draggable="false" oncontextmenu="return false;" style="width: 100%; max-width: 85px; height: auto; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none;">
+                </div>
+
+                <!-- 3. SPORTS -->
+                <div class="category-item" onclick="navigateTo('/sportsbook', true)" style="flex: 0 0 auto; width: 85px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <img src="img/sports.png" alt="Sports" draggable="false" oncontextmenu="return false;" style="width: 100%; max-width: 85px; height: auto; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none;">
+                </div>
+
+                <!-- 4. CASINO -->
+                <div class="category-item" onclick="navigateTo('/live', true)" style="flex: 0 0 auto; width: 85px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <img src="img/casino.png" alt="Casino" draggable="false" oncontextmenu="return false;" style="width: 100%; max-width: 85px; height: auto; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none;">
+                </div>
+
+                <!-- 5. P2P -->
+                <div class="category-item" onclick="navigateTo('/other', true)" style="flex: 0 0 auto; width: 85px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <img src="img/p2p.png" alt="P2P" draggable="false" oncontextmenu="return false;" style="width: 100%; max-width: 85px; height: auto; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none;">
+                </div>
+
+                <!-- 6. SABUNG AYAM -->
+                <div class="category-item" onclick="navigateTo('/other', true)" style="flex: 0 0 auto; width: 85px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <img src="img/sabungayam.png" alt="Sabung Ayam" draggable="false" oncontextmenu="return false;" style="width: 100%; max-width: 85px; height: auto; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none;">
+                </div>
+
+                <!-- 7. TEMBAK IKAN -->
+                <div class="category-item" onclick="navigateTo('/fishing', true)" style="flex: 0 0 auto; width: 85px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <img src="img/tembakikan.png" alt="Tembak Ikan" draggable="false" oncontextmenu="return false;" style="width: 100%; max-width: 85px; height: auto; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none;">
+                </div>
+
+                <!-- 8. LOTRE -->
+                <div class="category-item" onclick="navigateTo('/other', true)" style="flex: 0 0 auto; width: 85px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <img src="img/lotre.png" alt="Lotre" draggable="false" oncontextmenu="return false;" style="width: 100%; max-width: 85px; height: auto; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none;">
+                </div>
+
+                <!-- 9. E-GAMES -->
+                <div class="category-item" onclick="navigateTo('/other', true)" style="flex: 0 0 auto; width: 85px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <img src="img/egames.png" alt="E-Games" draggable="false" oncontextmenu="return false;" style="width: 100%; max-width: 85px; height: auto; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none;">
+                </div>
+                
             </section>
 
             <!-- JACKPOT SECTION -->
@@ -161,7 +212,7 @@
                 <div class="card-value">IDR 35.887.788.361.00</div>
             </section>
 
-            <!-- POPULAR GAMES SECTION (Dipindah ke bawah Jackpot) -->
+            <!-- POPULAR GAMES SECTION -->
             <section class="home-games-section" style="margin-top: 20px;">
                 <h2 style="text-align: center; color: #fff; font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">Popular Games</h2>
                 <div class="home-games-track" id="popularGamesTrack">
@@ -182,7 +233,7 @@
                 <div class="server-status">Status: Belum terhubung ke server</div>
             </section>
 
-            <!-- NEW GAMES SECTION (Dipindah ke bawah Server Selector) -->
+            <!-- NEW GAMES SECTION -->
             <section class="home-games-section" style="margin-top: 20px;">
                 <h2 style="text-align: center; color: #fff; font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">New Games</h2>
                 <div class="home-games-track" id="newGamesTrack">
