@@ -1,0 +1,5 @@
+.pd-form-group { margin-bottom: 15px; }
+.pd-form-group label { display: block; color: #fff; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
+.pd-input { width: 100%; padding: 12px; background: transparent; border: 1px solid #fff; color: #fff; border-radius: 4px; outline: none; font-size: 14px; }
+.pd-input:focus { border-color: #a855f7; }
+.pd-input option { background: #000; }
